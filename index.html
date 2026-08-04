@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大佬潘专属工作台</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#ffffff; --ink:#1f2430; --sub:#6b7280;
+    --accent:#6d5df6; --accent2:#8b7cf8; --accent-soft:#efedfe;
+    --line:#e6e8f0; --danger:#e5484d; --ok:#18a058;
+    --shadow:0 2px 10px rgba(30,34,60,.06),0 8px 30px rgba(30,34,60,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+  body{background:var(--bg);color:var(--ink);min-height:100vh}
+  .page{display:none;max-width:1280px;margin:0 auto;padding:28px 24px 60px}
+  .page.active{display:block}
+
+  /* ---------- 首页 ---------- */
+  #page-home{max-width:860px;text-align:center;padding-top:9vh}
+  .home-logo{width:64px;height:64px;border-radius:18px;margin:0 auto 22px;
+    background:linear-gradient(135deg,var(--accent),#a78bfa);display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:30px;box-shadow:0 10px 26px rgba(109,93,246,.35)}
+  .home-title{font-size:34px;font-weight:700;letter-spacing:2px}
+  .home-subtitle{color:var(--accent);margin:8px 0 4px;font-size:16px;font-weight:600;letter-spacing:1px}
+  .home-sub{color:var(--sub);margin:6px 0 42px;font-size:14px}
+  .home-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .home-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px 20px;cursor:pointer;box-shadow:var(--shadow);transition:.18s;text-align:center}
+  .home-card:hover{transform:translateY(-3px);border-color:var(--accent2);box-shadow:0 12px 32px rgba(109,93,246,.18)}
+  .home-card .ic{font-size:30px;margin-bottom:10px}
+  .home-card .t{font-size:18px;font-weight:600}
+  .home-card .d{font-size:13px;color:var(--sub);margin-top:6px}
+
+  /* ---------- 通用头部 ---------- */
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+  .back-btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 16px;
+    cursor:pointer;font-size:14px;color:var(--ink);transition:.15s}
+  .back-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .page-title{font-size:22px;font-weight:700}
+  .spacer{flex:1}
+  .btn{border:none;border-radius:10px;padding:9px 18px;font-size:14px;cursor:pointer;transition:.15s;font-weight:500}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#5a49f0}
+  .btn-ghost{background:var(--accent-soft);color:var(--accent)}
+  .btn-ghost:hover{background:#e2defc}
+  .btn-danger{background:#fdebec;color:var(--danger)}
+  .btn-danger:hover{background:#fad4d6}
+  .mini-btn{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:7px;padding:2px 9px;font-size:11px;cursor:pointer;transition:.12s}
+  .mini-btn:hover{background:#fdebec;color:var(--danger);border-color:#f3b6ba}
+  .void-badge{background:#fdebec;color:var(--danger);border:1px solid #f3b6ba;border-radius:7px;padding:2px 9px;font-size:12px;font-weight:600}
+  .void-reason{color:var(--danger);font-size:11px;margin-top:3px;line-height:1.4}
+  .void-reason-box{background:#fdf3f4;border:1px solid #f3d2d5;border-radius:8px;padding:8px 12px;margin-bottom:10px;color:var(--danger);font-size:12px;line-height:1.5}
+  tr.void-row td{opacity:.6;background:#fbf3f4}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+
+  /* ---------- 筛选条 ---------- */
+  .filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+  .filters label{font-size:13px;color:var(--sub)}
+  .filters select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;min-width:110px}
+  .hint{font-size:12px;color:var(--sub)}
+
+  /* ---------- 表格 ---------- */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+  table{border-collapse:collapse;width:100%;min-width:1500px}
+  th{background:#f3f2fd;color:#4c4370;font-size:13px;font-weight:600;padding:10px 8px;
+    border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap;position:sticky;top:0}
+  td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:0;vertical-align:middle;background:#fff}
+  td:last-child,th:last-child{border-right:none}
+  tr:last-child td{border-bottom:none}
+  td input,td select{width:100%;border:none;outline:none;padding:9px 8px;font-size:13px;background:transparent;min-width:80px}
+  td select{cursor:pointer}
+  td input:focus,td select:focus{background:var(--accent-soft)}
+  td.formula-cell input{color:#0b6bcb;font-weight:500}
+  th.price-col, td.price-col input{color:#d2202a}
+  td.price-col input{font-weight:600;font-size:16px}
+  th.qty-col, td.qty-col input, th.qty-col-disp, td.qty-col-disp{color:#d2202a}
+  td.qty-col input{font-weight:600;font-size:19px}
+  td.qty-col-disp{font-weight:600;font-size:19px}
+  th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+  th.sortable:hover{color:var(--accent)}
+  th.sortable .sort-ind{font-size:10px;margin-left:3px;color:var(--sub);opacity:.45}
+  th.sort-asc,th.sort-desc{color:var(--accent)}
+  th.sort-asc .sort-ind,th.sort-desc .sort-ind{opacity:1;color:var(--accent)}
+  th.price-col.sort-asc,th.price-col.sort-desc{color:#d2202a}
+  th.qty-col.sort-asc,th.qty-col.sort-desc{color:#d2202a}
+  /* 单元格居中（下单页指定列） */
+  .col-center{text-align:center}
+  .col-center input,.col-center select{text-align:center}
+  /* 草稿箱 */
+  .draft-card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;background:#fff}
+  .draft-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px}
+  .draft-detail{font-size:13px;color:var(--text)}
+  .draft-ops{display:flex;gap:8px;justify-content:flex-end;margin-top:2px}
+  td.calcgrid-cell{padding:2px 3px}
+  table.calc-mini{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;overflow:hidden}
+  table.calc-mini td{padding:1px 2px;border:none;vertical-align:middle}
+  table.calc-mini .cl{width:30px;text-align:right;color:var(--sub);font-size:11px;font-weight:600;padding-right:5px;white-space:nowrap}
+  table.calc-mini .cv input{width:100%;min-width:0;padding:3px 5px;border:1px solid var(--line);border-radius:5px;font-size:12px;box-sizing:border-box}
+  table.calc-mini tr + tr td{padding-top:2px}
+  td .dup-warn{background:#fff1f1 !important}
+  /* 下单页产品名重复：弹窗期间重复位置闪烁标红 */
+  @keyframes dupFlash{ 0%,100%{background-color:#ffe0e0} 50%{background-color:#ff8a8a} }
+  td.prod-cell.dup-flash, td.prod-cell.dup-flash input{ animation:dupFlash .7s ease-in-out infinite; border-radius:6px }
+  /* 输入过程中实时标红的重复提示 */
+  td.prod-cell.dup-live input{ border-color:var(--danger);box-shadow:0 0 0 2px rgba(210,32,42,.18) }
+  td.prod-cell.dup-live::after{ content:'⚠ 重复'; position:absolute; right:4px; top:-9px; z-index:5;
+    background:var(--danger); color:#fff; font-size:10px; line-height:1; padding:2px 5px; border-radius:6px; white-space:nowrap }
+  .del-cell{width:44px;text-align:center}
+  .del-row{color:#c3c6d4;cursor:pointer;font-size:15px;padding:6px;background:none;border:none}
+  .del-row:hover{color:var(--danger)}
+  .rise-cell{padding:9px 8px;font-size:13px;color:var(--ok);font-weight:600;white-space:nowrap}
+  .rise-cell.neg{color:var(--danger)}
+  /* 选中行整行淡紫色高亮（不影响文字可读性） */
+  tbody tr.sel td,
+  tbody tr:has(.row-check:checked) td,
+  tbody tr:has(.orow-check:checked) td{background:#f1ebff}
+  tbody tr.sel:hover td,
+  tbody tr:has(.row-check:checked):hover td,
+  tbody tr:has(.orow-check:checked):hover td{background:#ece3ff}
+
+  /* ---------- 弹窗 ---------- */
+  .modal-mask{display:none;position:fixed;inset:0;background:rgba(20,22,40,.45);z-index:50;
+    align-items:center;justify-content:center;padding:20px}
+  .modal-mask.show{display:flex}
+  .modal{background:#fff;border-radius:16px;max-width:1100px;width:100%;max-height:86vh;
+    display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+  .modal-head{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .modal-head .t{font-size:16px;font-weight:600}
+  .modal-close{margin-left:auto;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)}
+  .modal-body{padding:16px 20px;overflow:auto}
+  .modal-foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
+
+  .pick-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+  .pick-item{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;
+    padding:9px 12px;cursor:pointer;font-size:13px;transition:.12s}
+  .pick-item:hover{border-color:var(--accent2)}
+  .pick-item.on{border-color:var(--accent);background:var(--accent-soft)}
+
+  .cmp-filter{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+  .cmp-filter .f-inp{flex:1;min-width:180px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+  .cmp-filter select{padding:8px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;cursor:pointer}
+
+  .cmp-tbl th{position:static}
+  .cmp-tbl{min-width:1200px}
+  .cmp-tbl td{padding:8px;font-size:13px}
+
+  /* ---------- 估价计算器 ---------- */
+  .calc-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:18px;border:1px solid var(--line);
+    border-radius:12px;background:#fff;margin-bottom:14px}
+  .calc-row .title{font-weight:600;font-size:15px;min-width:150px;color:#4c4370}
+  .calc-row input{width:110px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;text-align:center}
+  .calc-row input:focus{outline:none;border-color:var(--accent)}
+  .calc-op{font-size:16px;color:var(--sub);font-weight:600}
+  .calc-res{min-width:120px;padding:9px 14px;border-radius:8px;background:var(--accent-soft);
+    color:var(--accent);font-weight:700;font-size:16px;text-align:center}
+  .calc-sub{width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .calc-label{font-size:13px;color:var(--sub);min-width:64px}
+  .free-input{flex:1;min-width:260px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+
+  /* ---------- 下载页 ---------- */
+  .dl-hero{display:flex;align-items:center;gap:18px;padding:26px}
+  .dl-hero .ic{font-size:38px}
+  .dl-list{margin-top:18px}
+  .dl-item{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--sub)}
+  .dl-item:last-child{border:none}
+
+  /* ---------- 下单提交状态 & 日历 ---------- */
+  .order-status{margin-bottom:14px;padding:12px 16px;border-radius:12px;font-size:13px;display:none;align-items:center;gap:8px}
+  .order-status.show{display:flex}
+  .order-status.locked{background:#e8f7ee;color:#0f7a3d;border:1px solid #bfe8cf}
+  .order-status.editing{background:#fff7e6;color:#ad6800;border:1px solid #ffe3a3}
+  .cal-head{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
+  .cal-head .t{font-size:16px;font-weight:600;min-width:120px;text-align:center}
+  .cal-nav{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:14px}
+  .cal-nav:hover{border-color:var(--accent);color:var(--accent)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-wd{text-align:center;font-size:12px;color:var(--sub);padding:4px 0}
+  .cal-cell{position:relative;text-align:center;padding:10px 0 14px;border-radius:8px;cursor:pointer;font-size:13px;transition:.12s}
+  .cal-cell:hover{background:var(--accent-soft)}
+  .cal-cell.today{border:1px solid var(--accent)}
+  .cal-cell.sel{background:var(--accent);color:#fff}
+  .cal-dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--ok)}
+  .cal-cell.sel .cal-dot{background:#fff}
+  td input:disabled,td select:disabled{color:#8a8f9e;background:#fafafc;cursor:not-allowed}
+
+  /* ---------- 导入拖拽区 ---------- */
+  .dropzone{border:2px dashed var(--line);border-radius:12px;padding:34px 20px;text-align:center;
+    transition:.15s;background:#fafaff;cursor:default}
+  .dropzone.over{border-color:var(--accent);background:var(--accent-soft)}
+
+  /* ---------- 录入页整屏自适应（无横向滚动条） ---------- */
+  #page-entry{max-width:none}
+  #page-order{max-width:none}
+  .tbl-wrap.fit{overflow-x:auto}
+  #entry-table{min-width:0;width:100%;table-layout:fixed}
+  #entry-table th{padding:10px 4px;font-size:12px;overflow:hidden;text-overflow:ellipsis}
+  #entry-table td input,#entry-table td select{min-width:0;padding:8px 4px;font-size:12px}
+  #entry-table td select{appearance:none;-webkit-appearance:none;background-image:none;text-overflow:ellipsis}
+  #entry-table .rise-cell{padding:8px 4px;font-size:12px}
+  #order-table{min-width:0;width:100%;table-layout:fixed}
+  #order-table th{padding:10px 4px;font-size:12px;overflow:hidden;text-overflow:ellipsis}
+  #order-table td input,#order-table td select{min-width:0;padding:8px 4px;font-size:12px}
+  #order-table .chk-col{width:3.5%;padding:0 !important;text-align:center}
+  #order-table .chk-col input{width:16px;height:16px;min-width:0;cursor:pointer;accent-color:var(--accent)}
+  .today-orders{margin-top:18px}
+  .today-orders .today-head{font-weight:600;font-size:14px;margin-bottom:8px;color:var(--ink)}
+  .batch-count{font-weight:600;color:var(--accent);font-size:13px;margin-right:4px}
+  .chk-col{width:3%;padding:0 !important;text-align:center;vertical-align:middle}
+  .chk-col input{width:16px;height:16px;min-width:0;cursor:pointer;accent-color:var(--accent)}
+  .rs{position:absolute;top:0;right:0;width:7px;height:100%;cursor:col-resize;z-index:3}
+  .rs:hover{background:linear-gradient(var(--accent),var(--accent2))}
+  body.rs-drag{user-select:none;cursor:col-resize}
+
+  /* 模糊搜索下拉 */
+  .sug-box{position:absolute;background:#fff;border:1px solid var(--line);border-radius:10px;
+    box-shadow:var(--shadow);z-index:60;max-height:220px;overflow:auto;min-width:180px}
+  .sug-item{padding:8px 12px;font-size:13px;cursor:pointer}
+  .sug-item:hover{background:var(--accent-soft)}
+  .sug-sub{display:block;font-size:11px;color:var(--sub);margin-top:2px}
+
+  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#2b2f3f;color:#fff;
+    padding:10px 20px;border-radius:10px;font-size:13px;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+  .toast.show{opacity:1}
+  .kbd{border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px;background:#fff;color:var(--sub)}
+</style>
+</head>
+<body>
+
+<!-- ============ 首页 ============ -->
+<div class="page active" id="page-home">
+  <div class="home-logo">藏</div>
+  <div class="home-title">大佬潘专属工作台</div>
+  <div class="home-subtitle">藏物志配饰成本、卖价核算、统计、下单一站式管理平台</div>
+  <div class="home-sub">本地存储 · 数据保存在本机浏览器中 · 支持导出 Excel</div>
+  <div class="home-grid">
+    <div class="home-card" onclick="go('entry')"><div class="ic">📝</div><div class="t">录入</div><div class="d">录入产品成本 / 定价 / 涨幅明细</div></div>
+    <div class="home-card" onclick="go('order')"><div class="ic">📦</div><div class="t">下单</div><div class="d">向厂家一次性批量下单登记</div></div>
+    <div class="home-card" onclick="go('calc')"><div class="ic">🧮</div><div class="t">卖价预估计算</div><div class="d">金版 / 银版 / 银金版快速估价</div></div>
+    <div class="home-card" onclick="go('download')"><div class="ic">⬇️</div><div class="t">下载</div><div class="d">导出全部产品 Excel 并记录下载历史</div></div>
+  </div>
+</div>
+
+<!-- ============ 录入页 ============ -->
+<div class="page" id="page-entry">
+  <div class="topbar">
+    <button class="back-btn" onclick="go('home')">← 返回首页</button>
+    <div class="page-title">产品录入</div>
+    <span class="hint">克重 / 成本价 / 计算位 均支持公式：<b>先手动输入 =</b> 才会进入公式模式（此时可点选本产品<b>任意数字格</b>引用，如 <b>=[金克重]×123</b>，并自动计算）；<b>未输入 = 时按普通数值填写，不会自动计算</b>。各迷你网格的 金/银/总和、工费、定价 均可引用；总和行可写 <b>=[金]+[银]</b>；引用名：<b>[克重] [金克重] [银克重] [成本价] [金成本价] [银成本价] [金] [银] [计算位] [工费] [定价]</b> · <span class="kbd">Ctrl+Z</span> 撤销</span>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" onclick="document.getElementById('imp-result').innerHTML='';document.getElementById('imp-mask').classList.add('show')">📤 导入模板</button>
+    <button class="btn btn-ghost" onclick="openCompare()">🔍 对比</button>
+    <button class="btn btn-primary" onclick="addProductRow()">＋ 新增一行</button>
+    <button class="btn btn-danger" onclick="batchDelete()">🗑 批量删除选中</button>
+    <button class="btn btn-primary" onclick="oneClickOrder()" style="background:var(--ok)">🛒 一键下单</button>
+    <button class="btn btn-ghost" onclick="clearSelect()">清除选择</button>
+  </div>
+
+  <div class="filters card">
+    <label>厂家</label><select id="f-factory" onchange="renderEntry()"></select>
+    <label>品牌商</label><select id="f-brand" onchange="renderEntry()"></select>
+    <label>材质</label><select id="f-material" onchange="renderEntry()"></select>
+    <label>品类</label><select id="f-category" onchange="renderEntry()"></select>
+    <label style="margin-left:6px">搜索</label><input id="f-search" placeholder="主商家编码 / 产品名称" oninput="renderEntry()"
+      style="padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;min-width:170px">
+    <button class="btn btn-ghost" style="padding:6px 12px" onclick="clearFilters();document.getElementById('f-search').value='';renderEntry()">清除筛选</button>
+    <button class="btn btn-ghost" style="padding:6px 12px" onclick="clearSort('entry')">↺ 取消排序</button>
+    <div class="spacer"></div>
+    <span class="hint" id="sel-count" style="color:var(--accent);font-weight:600"></span>
+    <span class="hint" id="entry-count"></span>
+  </div>
+
+  <div class="filters card" id="entry-batch" style="display:none;background:#faf8ff;border-color:#d9d2f5">
+    <span class="batch-count" id="entry-batch-count"></span>
+    <button class="btn btn-ghost" style="padding:6px 14px" onclick="copySelectedRows()" title="把选中的整行复制为新的独立行（粘贴到顶部）">📄 复制所选行</button>
+    <label>厂家</label><select id="es-factory"></select>
+    <label>品牌商</label><select id="es-brand"></select>
+    <label>材质</label><select id="es-material"></select>
+    <label>品类</label><select id="es-category"></select>
+    <button class="btn btn-primary" onclick="batchSetProductAttrs()">应用到选中</button>
+  </div>
+
+  <div class="tbl-wrap fit">
+    <table id="entry-table">
+      <thead>
+        <tr>
+          <th class="chk-col"><input type="checkbox" id="chk-all" onclick="toggleAll(this)" title="全选 / 取消全选"></th>
+          <th class="sortable" data-sort="code" style="width:6%" onclick="sortBy('entry','code',this)">主商家编码<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="factory" style="width:6.5%" onclick="sortBy('entry','factory',this)">厂家<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="brand" style="width:7.5%" onclick="sortBy('entry','brand',this)">品牌商<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="name" style="width:8%" onclick="sortBy('entry','name',this)">产品名称<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="size" style="width:4.5%" onclick="sortBy('entry','size',this)">尺寸<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="material" style="width:6.5%" onclick="sortBy('entry','material',this)">材质<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="weight" style="width:6.5%" onclick="sortBy('entry','weight',this)">克重<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="template" style="width:7.5%" onclick="sortBy('entry','template',this)">算法公式模板<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="cost" style="width:8.5%" onclick="sortBy('entry','cost',this)">成本价<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="fee" style="width:4.5%" onclick="sortBy('entry','fee',this)">工费<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="calc" style="width:9%" onclick="sortBy('entry','calc',this)">计算位<span class="sort-ind">⇅</span></th>
+          <th class="sortable price-col" data-sort="price" style="width:4.5%" onclick="sortBy('entry','price',this)">定价<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="rise" style="width:5%" onclick="sortBy('entry','rise',this)">涨幅<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="category" style="width:6%" onclick="sortBy('entry','category',this)">品类<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="note" style="width:8%" onclick="sortBy('entry','note',this)">备注<span class="sort-ind">⇅</span></th>
+          <th style="width:2.5%">删</th>
+        </tr>
+      </thead>
+      <tbody id="entry-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ 下单页 ============ -->
+<div class="page" id="page-order">
+  <div class="topbar">
+    <button class="back-btn" onclick="go('home')">← 返回首页</button>
+    <button class="btn btn-ghost" onclick="go('entry')">↩ 返回录入页</button>
+    <div class="page-title">下单</div>
+    <span class="hint">产品名称支持模糊搜索 · 下单日期自动抓取当天 · <span class="kbd">Ctrl+Z</span> 撤销</span>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" onclick="openCalendar()">📅 查询</button>
+    <button class="btn btn-ghost" onclick="openDraftBox()">📥 草稿箱</button>
+    <button class="btn btn-ghost" id="btn-new-order" onclick="newOrder()">🆕 新建下单</button>
+    <button class="btn btn-primary" id="btn-add-order" onclick="addOrderRow()">＋ 新增一行</button>
+    <button class="btn btn-primary" id="btn-save-order" onclick="saveOrderDraft()">💾 保存</button>
+    <button class="btn btn-primary" id="btn-submit-order" style="background:var(--ok)" onclick="submitOrder()">✅ 提交</button>
+    <button class="btn btn-danger" id="btn-modify-order" onclick="modifyOrder()">✏️ 修改</button>
+    <button class="btn btn-danger" id="btn-batch-order" onclick="batchDeleteOrder()">🗑 批量删除选中</button>
+  </div>
+
+  <div class="order-status" id="order-status"></div>
+
+  <div class="filters card">
+    <label>下单人</label><select id="f-orderer" onchange="renderOrder()"></select>
+    <label>厂家</label><select id="f-ofactory" onchange="renderOrder()"></select>
+    <label>材质</label><select id="f-omaterial" onchange="renderOrder()"></select>
+    <button class="btn btn-ghost" style="padding:6px 12px" onclick="clearOrderFilters()">清除筛选</button>
+    <button class="btn btn-ghost" style="padding:6px 12px" onclick="clearSort('order')">↺ 取消排序</button>
+    <div class="spacer"></div>
+    <span class="hint" id="order-count"></span>
+  </div>
+
+  <div class="tbl-wrap">
+    <table id="order-table">
+      <thead>
+        <tr>
+          <th class="chk-col"><input type="checkbox" id="ochk-all" onclick="toggleOrderAll(this)"></th>
+          <th class="sortable" data-sort="code" style="width:11%" onclick="sortBy('order','code',this)">主商家编码<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="factory" style="width:11%" onclick="sortBy('order','factory',this)">厂家<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="orderer" style="width:9%" onclick="sortBy('order','orderer',this)">下单人<span class="sort-ind">⇅</span></th>
+          <th class="sortable" data-sort="product" style="width:16%" onclick="sortBy('order','product',this)">产品名称<span class="sort-ind">⇅</span></th>
+          <th class="sortable col-center" data-sort="size" style="width:6%" onclick="sortBy('order','size',this)">尺寸<span class="sort-ind">⇅</span></th>
+          <th class="sortable col-center" data-sort="material" style="width:7%" onclick="sortBy('order','material',this)">材质<span class="sort-ind">⇅</span></th>
+          <th class="sortable col-center" data-sort="stock" style="width:9%" onclick="sortBy('order','stock',this)">目前库存<span class="sort-ind">⇅</span></th>
+          <th class="sortable col-center" data-sort="saleStatus" style="width:12%" onclick="sortBy('order','saleStatus',this)">预售单量<span class="sort-ind">⇅</span></th>
+          <th class="sortable qty-col col-center" data-sort="qty" style="width:9%" onclick="sortBy('order','qty',this)">下单数量<span class="sort-ind">⇅</span></th>
+          <th class="sortable col-center" data-sort="date" style="width:11%" onclick="sortBy('order','date',this)">下单日期<span class="sort-ind">⇅</span></th>
+          <th class="del-cell" style="width:4.5%">删</th>
+        </tr>
+      </thead>
+      <tbody id="order-body"></tbody>
+    </table>
+  </div>
+
+  <div class="today-orders card" id="today-orders"></div>
+</div>
+
+<!-- ============ 卖价预估计算页 ============ -->
+<div class="page" id="page-calc">
+  <div class="topbar">
+    <button class="back-btn" onclick="go('home')">← 返回首页</button>
+    <div class="page-title">卖价预估计算</div>
+  </div>
+
+  <div class="calc-row">
+    <div class="title">① 金版估价计算器</div>
+    <span class="calc-op">(</span>
+    <input type="number" id="g-weight" placeholder="克重" oninput="calcGold()">
+    <span class="calc-op">×</span>
+    <input type="number" id="g-price" placeholder="克价" oninput="calcGold()">
+    <span class="calc-op">＋</span>
+    <input type="number" id="g-fee" placeholder="工费" oninput="calcGold()">
+    <span class="calc-op">)</span>
+    <span class="calc-op">×</span>
+    <input type="number" id="g-mul" value="1.3" step="0.01" placeholder="倍率" oninput="calcGold()">
+    <span class="calc-op">=</span>
+    <div class="calc-res" id="g-res">—</div>
+  </div>
+
+  <div class="calc-row">
+    <div class="title">② 银版估价计算器</div>
+    <input type="number" id="s-cost" placeholder="成本" oninput="calcSilver()">
+    <span class="calc-op">×</span>
+    <input type="number" id="s-x" value="2" oninput="calcSilver()">
+    <span class="calc-op">＋</span>
+    <input type="number" id="s-add" value="20" oninput="calcSilver()">
+    <span class="calc-op">=</span>
+    <div class="calc-res" id="s-res">—</div>
+  </div>
+
+  <div class="calc-row" style="flex-direction:column;align-items:flex-start">
+    <div class="title">③ 银金估价计算器</div>
+    <div class="calc-sub">
+      <span class="calc-label">金子卖价</span>
+      <span class="calc-op">(</span>
+      <input type="number" id="sg-gw" placeholder="克重" oninput="calcSG()">
+      <span class="calc-op">×</span>
+      <input type="number" id="sg-gp" placeholder="克价" oninput="calcSG()">
+      <span class="calc-op">＋</span>
+      <input type="number" id="sg-gf" placeholder="工费" oninput="calcSG()">
+      <span class="calc-op">)</span>
+      <span class="calc-op">×</span>
+      <input type="number" id="sg-gmul" value="1.3" step="0.01" placeholder="倍率" oninput="calcSG()">
+      <span class="calc-op">=</span>
+      <div class="calc-res" id="sg-gres">—</div>
+    </div>
+    <div class="calc-sub">
+      <span class="calc-label">银子卖价</span>
+      <input type="number" id="sg-sc" placeholder="银成本" oninput="calcSG()">
+      <span class="calc-op">×</span>
+      <input type="number" id="sg-sx" value="2" oninput="calcSG()">
+      <span class="calc-op">＋</span>
+      <input type="number" id="sg-sa" value="20" oninput="calcSG()">
+      <span class="calc-op">=</span>
+      <div class="calc-res" id="sg-sres">—</div>
+    </div>
+    <div class="calc-sub">
+      <span class="calc-label" style="font-weight:600;color:var(--accent)">整体卖价</span>
+      <span class="hint">金子卖价 ＋ 银子卖价 =</span>
+      <div class="calc-res" id="sg-total" style="font-size:18px">—</div>
+    </div>
+  </div>
+
+  <div class="calc-row">
+    <div class="title">④ 自由计算</div>
+    <input class="free-input" id="free-exp" placeholder="输入算式，如 12.5*680+45-10" oninput="calcFree()">
+    <span class="calc-op">=</span>
+    <div class="calc-res" id="free-res">—</div>
+  </div>
+</div>
+
+<!-- ============ 下载页 ============ -->
+<div class="page" id="page-download">
+  <div class="topbar">
+    <button class="back-btn" onclick="go('home')">← 返回首页</button>
+    <div class="page-title">下载</div>
+  </div>
+  <div class="card dl-hero">
+    <div class="ic">📊</div>
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:16px">导出全部录入产品为 Excel</div>
+      <div class="hint" style="margin-top:4px">包含全部字段：厂家、品牌商、产品名称、材质、克重、算法公式模板、成本价、工费、计算位、定价、涨幅、品类、备注</div>
+    </div>
+    <button class="btn btn-primary" style="padding:12px 26px;font-size:15px" onclick="downloadExcel()">⬇️ 下载 Excel</button>
+  </div>
+  <div class="card dl-hero" style="margin-top:14px">
+    <div class="ic">📦</div>
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:16px">导出下单记录为 Excel</div>
+      <div class="hint" style="margin-top:4px">包含所有已提交的下单记录：提交日期、厂家、下单人、产品名称、目前库存、预售单量、下单数量、下单日期</div>
+    </div>
+    <button class="btn btn-primary" style="padding:12px 26px;font-size:15px" onclick="downloadOrdersExcel()">⬇️ 下载下单记录</button>
+  </div>
+  <div class="card dl-list">
+    <div style="font-weight:600;margin-bottom:8px">下载历史记录</div>
+    <div id="dl-history"></div>
+  </div>
+</div>
+
+<!-- ============ 对比弹窗 ============ -->
+<div class="modal-mask" id="cmp-mask">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="t">产品对比 — 勾选要对比的产品</div>
+      <button class="modal-close" onclick="closeModal('cmp-mask')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cmp-filter">
+        <input id="cmp-search" class="f-inp" placeholder="搜索 产品名 / 编码 / 厂家" oninput="renderCmpPick()">
+        <select id="cmp-f-factory" onchange="renderCmpPick()"></select>
+        <select id="cmp-f-material" onchange="renderCmpPick()"></select>
+        <select id="cmp-f-brand" onchange="renderCmpPick()"></select>
+        <button class="btn btn-ghost" onclick="clearCmpFilter()">清空筛选</button>
+      </div>
+      <div class="pick-list" id="cmp-pick"></div>
+      <div id="cmp-result" style="margin-top:16px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="cmpSelected.clear();renderCmpPick();renderCmpResult()">清空选择</button>
+      <button class="btn btn-ghost" onclick="clearSort('cmp')">↺ 取消排序</button>
+      <button class="btn btn-primary" onclick="closeModal('cmp-mask')">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 联名款弹窗 ============ -->
+<div class="modal-mask" id="co-mask">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head"><div class="t">联名款 — 填写联名双方</div>
+      <button class="modal-close" onclick="closeModal('co-mask')">✕</button></div>
+    <div class="modal-body">
+      <div class="hint" style="margin-bottom:10px">填写"谁与谁联名"，例如：OLDMAN×GK。新增的联名品牌会自动加入品牌筛选项。</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="co-a" placeholder="品牌一" style="flex:1;padding:9px;border:1px solid var(--line);border-radius:8px">
+        <span style="font-weight:700">×</span>
+        <input id="co-b" placeholder="品牌二" style="flex:1;padding:9px;border:1px solid var(--line);border-radius:8px">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('co-mask')">取消</button>
+      <button class="btn btn-primary" onclick="confirmCoBrand()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 下单查询日历弹窗 ============ -->
+<div class="modal-mask" id="cal-mask">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-head">
+      <div class="t">下单记录查询 <span class="hint" style="font-weight:400">绿点 = 当天有下单记录</span></div>
+      <button class="modal-close" onclick="closeModal('cal-mask')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cal-head">
+        <button class="cal-nav" onclick="calShift(-1)">‹ 上月</button>
+        <div class="t" id="cal-title"></div>
+        <button class="cal-nav" onclick="calShift(1)">下月 ›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="cal-detail" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 作废理由弹窗 ============ -->
+<div class="modal-mask" id="void-mask">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <div class="t">作废下单记录</div>
+      <button class="modal-close" onclick="closeModal('void-mask')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint" style="margin:0 0 10px">该记录将被标记为「已作废」并<b>保留留痕</b>（不会彻底删除），查询时仍可见。请填写作废理由：</p>
+      <textarea id="void-reason" rows="4" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px;resize:vertical;box-sizing:border-box" placeholder="请输入作废理由（必填）"></textarea>
+      <div id="void-err" style="color:var(--danger);font-size:12px;min-height:16px;margin-top:6px"></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+        <button class="btn btn-ghost" onclick="closeModal('void-mask')">取消</button>
+        <button class="btn btn-danger" onclick="confirmVoid()">确认作废</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 草稿箱弹窗 ============ -->
+<div class="modal-mask" id="draft-mask">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <div class="t">📥 草稿箱</div>
+      <button class="modal-close" onclick="closeModal('draft-mask')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint" style="margin:0 0 10px">点「💾 保存」可把当前下单内容存入草稿箱（含保存日期与明细）；此处可随时调取或删除。调取后将覆盖当前表格，确认「✅ 提交」后数据才进入下单记录。</p>
+      <div id="draft-list"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closeModal('draft-mask')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 下单重复产品提示弹窗 ============ -->
+<div class="modal-mask" id="dup-mask">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head">
+      <div class="t">⚠️ 检测到重复产品</div>
+      <button class="modal-close" onclick="closeDupModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="dup-msg" class="hint" style="margin:0 0 10px;color:var(--danger);font-weight:600"></p>
+      <p class="hint" style="margin:0">重复的产品名称已在下方表格中<b>闪烁标红</b>，请确认是否需要为该产品保留多行下单。点击「关闭」后闪烁提示自动消失。</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closeDupModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 导入模板弹窗 ============ -->
+<div class="modal-mask" id="imp-mask">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head">
+      <div class="t">导入商品模板</div>
+      <button class="modal-close" onclick="closeModal('imp-mask')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="hint" style="margin-bottom:10px">支持 .xlsx / .xls / .csv。表格需包含「<b>主商家编码</b>」「<b>产品名称</b>」「<b>厂家</b>」「<b>品牌商</b>」四列（第一行为表头，列顺序任意，找不到的列留空即可）。<br>导入时以主商家编码为准：编码已存在则更新对应信息，不存在则新增一行；厂家 / 品牌商若为新值会自动加入下拉选项，其余字段可导入后手动补填。</div>
+      <div class="dropzone" id="imp-drop"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="impDrop(event)">
+        <div style="font-size:34px">📤</div>
+        <div style="margin-top:6px;font-size:14px;font-weight:600">拖拽文件到此处</div>
+        <div class="hint" style="margin-top:4px">或 <span style="color:var(--accent);cursor:pointer;text-decoration:underline" onclick="document.getElementById('imp-file').click()">点击选择文件</span></div>
+        <input type="file" id="imp-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="if(this.files[0])importFile(this.files[0]);this.value=''">
+      </div>
+      <div id="imp-result" style="margin-top:12px;font-size:13px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="xlsx.full.min.js"></script>
+<script>
+/* ================= 数据层 ================= */
+const LS_KEY = 'czz_data_v1';
+const DEFAULTS = {
+  factories: ['大锋','述艺'],
+  brands: ['OLDMAN','GK','译木','联名款'],
+  materials: ['金版','银版','银金版','铜版','佛身铜版'],
+  categories: ['三通','绳束','隔珠'],
+  orderers: ['尖措','译木','鬼五','潘潘']
+};
+let DB = load();
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const d = JSON.parse(raw);
+      d.options = Object.assign({}, JSON.parse(JSON.stringify(DEFAULTS)), d.options);
+      DEFAULTS && Object.keys(DEFAULTS).forEach(k=>{
+        DEFAULTS[k].forEach(v=>{ if(!d.options[k].includes(v)) d.options[k].push(v); });
+      });
+      d.products = d.products||[]; d.orders = d.orders||[]; d.downloads = d.downloads||[];
+      d.orderHistory = d.orderHistory||[];
+      d.orderDrafts = d.orderDrafts||[];
+      d.orderMeta = d.orderMeta||{ locked:false, recordId:null };
+      return d;
+    }
+  }catch(e){}
+  return { products: [], orders: [], downloads: [], orderHistory: [], orderDrafts: [],
+           orderMeta: { locked:false, recordId:null },
+           options: JSON.parse(JSON.stringify(DEFAULTS)) };
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(DB)); }
+
+/* ---------- 撤销 (Ctrl+Z) ---------- */
+let undoStack = [];
+function snapshot(){
+  undoStack.push(JSON.stringify(DB));
+  if(undoStack.length>80) undoStack.shift();
+}
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key.toLowerCase()==='z'){
+    const active = document.activeElement;
+    // 表单原生撤销优先级让给我们的全局撤销
+    e.preventDefault();
+    if(undoStack.length){
+      DB = JSON.parse(undoStack.pop());
+      save(); renderAll();
+      toast('已撤销一步');
+    } else toast('没有可撤销的操作');
+  }
+});
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function today(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+/* ================= 页面导航 ================= */
+function go(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  if(p==='entry') renderEntry();
+  if(p==='order') renderOrder();
+  if(p==='download') renderDownloads();
+  if(p==='calc') resetCalc();
+}
+/* 每次进入估价页清空上次数据 */
+function resetCalc(){
+  ['g-weight','g-price','g-fee','s-cost','sg-gw','sg-gp','sg-gf','sg-sc','free-exp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('s-x').value = 2; document.getElementById('s-add').value = 20;
+  document.getElementById('g-mul').value = 1.3; document.getElementById('sg-gmul').value = 1.3;
+  document.getElementById('sg-sx').value = 2; document.getElementById('sg-sa').value = 20;
+  ['g-res','s-res','sg-gres','sg-sres','sg-total','free-res'].forEach(id=>document.getElementById(id).textContent='—');
+}
+
+/* ================= 公式计算 ================= */
+/* 字段引用：[克重][成本价][工费][计算位][定价][金][银][总和][金克重][银克重][金成本价][银成本价] */
+const REF_FIELDS = { weight:'克重', cost:'成本价', fee:'工费', calc:'计算位', price:'定价',
+  gold:'金', silver:'银', total:'总和',
+  weightGold:'金克重', weightSilver:'银克重', costGold:'金成本价', costSilver:'银成本价' };
+function evalFormula(formula, row){
+  if(!formula || formula[0] !== '=') return formula;
+  let exp = formula.slice(1);
+  // 替换字段引用
+  exp = exp.replace(/\[(克重|成本价|工费|计算位|定价|金|银|总和|金克重|银克重|金成本价|银成本价)\]/g, (m,name)=>{
+    const key = Object.keys(REF_FIELDS).find(k=>REF_FIELDS[k]===name);
+    let v;
+    if(key==='cost') v = row.costFormula?row.costResult:row.cost;
+    else if(key==='calc') v = row.calcFormula?row.calcResult:row.calc;
+    else if(key==='gold') v = row.calcGoldFormula?row.calcGoldResult:row.calcGold;
+    else if(key==='silver') v = row.calcSilverFormula?row.calcSilverResult:row.calcSilver;
+    else if(key==='total') v = row.calcFormula?row.calcResult:row.calc;
+    else if(key==='weightGold') v = row.weightGoldFormula?row.weightGoldResult:row.weightGold;
+    else if(key==='weightSilver') v = row.weightSilverFormula?row.weightSilverResult:row.weightSilver;
+    else if(key==='costGold') v = row.costGoldFormula?row.costGoldResult:row.costGold;
+    else if(key==='costSilver') v = row.costSilverFormula?row.costSilverResult:row.costSilver;
+    else v = row[key];
+    return parseFloat(v)||0;
+  });
+  exp = exp.replace(/×/g,'*').replace(/÷/g,'/').replace(/（/g,'(').replace(/）/g,')').replace(/＋/g,'+').replace(/－/g,'-');
+  if(!/^[\d+\-*/().\s]+$/.test(exp)) return '公式错误';
+  try{
+    const r = Function('"use strict";return ('+exp+')')();
+    if(typeof r !== 'number' || !isFinite(r)) return '公式错误';
+    return +r.toFixed(2);
+  }catch(e){ return '公式错误'; }
+}
+
+/* 按依赖顺序重算：克重(金/银/总) → 成本价(金/银/总) → 计算位(金/银/总) */
+function recalcCalc(p){
+  if(!p) return;
+  if((p.weightGoldFormula||'').startsWith('=')){ p.weightGoldResult = evalFormula(p.weightGoldFormula, p); p.weightGold = p.weightGoldResult; }
+  if((p.weightSilverFormula||'').startsWith('=')){ p.weightSilverResult = evalFormula(p.weightSilverFormula, p); p.weightSilver = p.weightSilverResult; }
+  if((p.weightFormula||'').startsWith('=')){ p.weightResult = evalFormula(p.weightFormula, p); p.weight = p.weightResult; }
+  if((p.costGoldFormula||'').startsWith('=')){ p.costGoldResult = evalFormula(p.costGoldFormula, p); p.costGold = p.costGoldResult; }
+  if((p.costSilverFormula||'').startsWith('=')){ p.costSilverResult = evalFormula(p.costSilverFormula, p); p.costSilver = p.costSilverResult; }
+  if((p.costFormula||'').startsWith('=')){ p.costResult = evalFormula(p.costFormula, p); p.cost = p.costResult; }
+  if((p.calcGoldFormula||'').startsWith('=')){ p.calcGoldResult = evalFormula(p.calcGoldFormula, p); p.calcGold = p.calcGoldResult; }
+  if((p.calcSilverFormula||'').startsWith('=')){ p.calcSilverResult = evalFormula(p.calcSilverFormula, p); p.calcSilver = p.calcSilverResult; }
+  if((p.calcFormula||'').startsWith('=')){ p.calcResult = evalFormula(p.calcFormula, p); p.calc = p.calcResult; }
+}
+
+/* 通用 2列×3行 小网格（标签列 + 值列），用于 克重/成本价/计算位/算法公式模板 */
+function miniGrid(p, rows){
+  const cells = rows.map(r=>{
+    const val = r.isFormula ? (p[r.field+'Formula'] ? p[r.field+'Result'] : p[r.field]) : p[r.field];
+    const inp = r.isFormula
+      ? `<input data-ref="${r.ref}" data-formula-field="${r.field}" value="${esc(val)}" placeholder="数字或 =公式"
+            onfocus="formulaFocus(this,'${p.id}','${r.field}')" onmousedown="refClick(event,this)"
+            onblur="formulaBlur(this,'${p.id}','${r.field}')" onkeydown="if(event.key==='Enter')this.blur()">`
+      : `<input data-ref="${r.ref||''}" value="${esc(val)}" placeholder="${esc(r.ph||'')}" list="tpl-list"
+            onfocus="beginEdit(this)" onchange="setField('${p.id}','${r.field}',this.value)">`;
+    return `<tr><td class="cl">${r.label}</td><td class="cv${r.isFormula?' formula-cell':''}">${inp}</td></tr>`;
+  }).join('');
+  return `<td class="calcgrid-cell"><table class="calc-mini">${cells}</table></td>`;
+}
+const WEIGHT_ROWS = [
+  {label:'金', ref:'weightGold', field:'weightGold', isFormula:true},
+  {label:'银', ref:'weightSilver', field:'weightSilver', isFormula:true},
+  {label:'总和', ref:'weight', field:'weight', isFormula:true}
+];
+const COST_ROWS = [
+  {label:'金', ref:'costGold', field:'costGold', isFormula:true},
+  {label:'银', ref:'costSilver', field:'costSilver', isFormula:true},
+  {label:'总和', ref:'cost', field:'cost', isFormula:true}
+];
+const TPL_ROWS = [
+  {label:'金', ref:'', field:'templateGold', isFormula:false, ph:'金模板'},
+  {label:'银', ref:'', field:'templateSilver', isFormula:false, ph:'银模板'},
+  {label:'总和', ref:'', field:'template', isFormula:false, ph:'总模板'}
+];
+const CALC_ROWS = [
+  {label:'金', ref:'gold', field:'calcGold', isFormula:true},
+  {label:'银', ref:'silver', field:'calcSilver', isFormula:true},
+  {label:'总和', ref:'calc', field:'calc', isFormula:true}
+];
+
+/* ================= 录入页 ================= */
+function addProductRow(){
+  snapshot();
+  DB.products.unshift({ id: uid(), code:'', factory:'', brand:'', coBrand:'', name:'', size:'', material:'',
+    weight:'', weightFormula:'', weightResult:'', weightGold:'', weightGoldFormula:'', weightGoldResult:'',
+    weightSilver:'', weightSilverFormula:'', weightSilverResult:'',
+    template:'', templateGold:'', templateSilver:'',
+    cost:'', costFormula:'', costResult:'', costGold:'', costGoldFormula:'', costGoldResult:'',
+    costSilver:'', costSilverFormula:'', costSilverResult:'',
+    fee:'', calc:'', calcFormula:'', calcResult:'',
+    calcGold:'', calcGoldFormula:'', calcGoldResult:'',
+    calcSilver:'', calcSilverFormula:'', calcSilverResult:'',
+    price:'', category:'', note:'', createdAt: today() });
+  save(); renderEntry();
+}
+/* 复制选中行：把整行内容（含公式与计算结果）复制成新的独立行，粘贴到顶部 */
+function copySelectedRows(){
+  const ids = [...selectedIds];
+  if(!ids.length){ toast('请先勾选要复制的行'); return; }
+  snapshot();
+  let added = 0;
+  ids.forEach(id=>{
+    const src = DB.products.find(p=>p.id===id);
+    if(!src) return;
+    const copy = { ...src };
+    copy.id = uid();
+    copy.createdAt = today();
+    DB.products.unshift(copy);
+    added++;
+  });
+  save(); renderEntry();
+  toast(`已复制 ${added} 行为新行（置于顶部）`);
+}
+function delProduct(id){
+  if(!confirm('确定删除该行产品？')) return;
+  snapshot();
+  DB.products = DB.products.filter(p=>p.id!==id);
+  save(); renderEntry();
+}
+function toggleAll(el){
+  document.querySelectorAll('#entry-table .row-check').forEach(c=>{
+    c.checked = el.checked;
+    const id = c.dataset.id;
+    if(el.checked) selectedIds.add(id); else selectedIds.delete(id);
+  });
+  updateSelCount();
+}
+function onRowCheck(el, id){
+  if(el.checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateSelCount();
+}
+function clearSelect(){
+  selectedIds.clear();
+  document.querySelectorAll('#entry-table .row-check').forEach(c=>c.checked=false);
+  updateSelCount();
+}
+function updateSelCount(){
+  const el = document.getElementById('sel-count');
+  if(el) el.textContent = selectedIds.size ? `已选 ${selectedIds.size} 项` : '';
+  renderEntryBatchBar();
+}
+function batchDelete(){
+  const ids = [...selectedIds];
+  if(!ids.length){ toast('请先勾选要删除的行'); return; }
+  if(!confirm(`确定批量删除选中的 ${ids.length} 条产品？此操作可通过 Ctrl+Z 撤销`)) return;
+  snapshot();
+  DB.products = DB.products.filter(p=>!ids.includes(p.id));
+  ids.forEach(id=>selectedIds.delete(id));
+  save(); renderEntry();
+  toast(`已删除 ${ids.length} 条产品`);
+}
+
+/* 录入页：选中产品后批量设置 材质/品类/品牌商/厂家（直接写回产品字段） */
+function renderEntryBatchBar(){
+  const bar = document.getElementById('entry-batch');
+  if(!bar) return;
+  const n = selectedIds.size;
+  if(n===0){ bar.style.display='none'; return; }
+  bar.style.display='';
+  document.getElementById('entry-batch-count').textContent = `已选 ${n} 项 · 批量设置：`;
+  fillSelectKeep('es-factory', DB.options.factories);
+  fillSelectKeep('es-brand', DB.options.brands);
+  fillSelectKeep('es-material', DB.options.materials);
+  fillSelectKeep('es-category', DB.options.categories);
+}
+function batchSetProductAttrs(){
+  const f = document.getElementById('es-factory').value;
+  const b = document.getElementById('es-brand').value;
+  const m = document.getElementById('es-material').value;
+  const c = document.getElementById('es-category').value;
+  if(!f && !b && !m && !c){ toast('请至少选择一个要批量设置的属性（留空＝不修改）'); return; }
+  const ids = [...selectedIds];
+  if(!ids.length){ toast('请先勾选要设置的产品'); return; }
+  snapshot();
+  let n = 0;
+  ids.forEach(id=>{
+    const p = DB.products.find(x=>x.id===id);
+    if(!p) return;
+    if(f) p.factory = f;
+    if(b) p.brand = b;
+    if(m) p.material = m;
+    if(c) p.category = c;
+    n++;
+  });
+  save(); renderEntry();
+  const parts = [];
+  if(f) parts.push(`厂家 ${n} 项`);
+  if(b) parts.push(`品牌商 ${n} 项`);
+  if(m) parts.push(`材质 ${n} 项`);
+  if(c) parts.push(`品类 ${n} 项`);
+  toast('已批量设置：' + parts.join(' · '));
+}
+
+// 一键下单：将选中的产品同步到下单页草稿（未提交可多次叠加）
+function oneClickOrder(){
+  if(selectedIds.size===0){ toast('请先在录入页勾选要下单的产品'); return; }
+  if(DB.orderMeta && DB.orderMeta.locked){
+    if(confirm('下单页已提交并锁定。是否前往下单页解锁（修改）后再同步？')) go('order');
+    return;
+  }
+  snapshot();
+  let added=0, skipped=0;
+  selectedIds.forEach(id=>{
+    const p = DB.products.find(x=>x.id===id); if(!p) return;
+    if(DB.orders.some(o=>o.product===p.name && o.factory===p.factory)){ skipped++; return; }
+    DB.orders.push({ id: uid(), factory:p.factory, orderer:'', product:p.name, stock:'', saleStatus:'', qty:'', date: today() });
+    added++;
+  });
+  save();
+  selectedIds.forEach(id=>selectedIds.delete(id));
+  document.querySelectorAll('#entry-table .row-check').forEach(c=>c.checked=false);
+  updateSelCount();
+  go('order'); renderOrder();
+  toast('已同步 '+added+' 条到下单页'+(skipped?('，跳过已存在 '+skipped+' 条'):'')+'（其余信息请手动填写）');
+}
+
+function optSelect(list, val, onchange, addLabel){
+  let html = `<select onchange="${onchange}">`;
+  html += `<option value=""${val?'':' selected'}>请选择</option>`;
+  list.forEach(o=>{ html += `<option value="${esc(o)}"${o===val?' selected':''}>${esc(o)}</option>`; });
+  html += `<option value="__ADD__">＋ ${addLabel}…</option></select>`;
+  return html;
+}
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function fillFilter(selId, list, label){
+  const sel = document.getElementById(selId);
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">全部${label}</option>` + list.map(o=>`<option${o===cur?' selected':''}>${esc(o)}</option>`).join('');
+}
+function clearFilters(){ ['f-factory','f-brand','f-material','f-category'].forEach(id=>document.getElementById(id).value=''); renderEntry(); }
+
+function brandFilterList(){
+  // 品牌筛选项 = 基础品牌 + 已出现的联名品牌
+  const co = new Set();
+  DB.products.forEach(p=>{ if(p.brand==='联名款' && p.coBrand) co.add(p.coBrand); });
+  (DB.options.coBrands||[]).forEach(c=>co.add(c));
+  return [...DB.options.brands.filter(b=>b!=='联名款'), '联名款', ...co];
+}
+
+function renderEntry(){
+  fillFilter('f-factory', DB.options.factories, '厂家');
+  fillFilter('f-brand', brandFilterList(), '品牌商');
+  fillFilter('f-material', DB.options.materials, '材质');
+  fillFilter('f-category', DB.options.categories, '品类');
+
+  const ff = document.getElementById('f-factory').value;
+  const fb = document.getElementById('f-brand').value;
+  const fm = document.getElementById('f-material').value;
+  const fc = document.getElementById('f-category').value;
+  const kw = (document.getElementById('f-search').value||'').trim().toLowerCase();
+
+  let rows = DB.products.filter(p=>{
+    if(ff && p.factory!==ff) return false;
+    if(fb){
+      if(fb==='联名款'){ if(p.brand!=='联名款') return false; }
+      else if(p.brand!==fb && p.coBrand!==fb) return false;
+    }
+    if(fm && p.material!==fm) return false;
+    if(fc && p.category!==fc) return false;
+    if(kw){
+      const hay = ((p.code||'')+' '+(p.name||'')).toLowerCase();
+      if(!hay.includes(kw)) return false;
+    }
+    return true;
+  });
+  document.getElementById('entry-count').textContent = `显示 ${rows.length} / 共 ${DB.products.length} 条`;
+  rows = sortRows(rows, 'entry');
+  updateSelCount();
+  initColResize('entry-table','entry');
+  updateSortInd('entry');
+  const tb = document.getElementById('entry-body');
+  tb.innerHTML = rows.map(p=>{
+    const rise = riseOf(p);
+    const brandShow = p.brand==='联名款' && p.coBrand ? `联名款(${p.coBrand})` : p.brand;
+    return `<tr data-id="${p.id}"${selectedIds.has(p.id)?' class="sel"':''}>
+      <td class="chk-col"><input type="checkbox" class="row-check" data-id="${p.id}"${selectedIds.has(p.id)?' checked':''} onchange="onRowCheck(this,'${p.id}')"></td>
+      <td><input value="${esc(p.code||'')}" placeholder="主商家编码"
+            onfocus="beginEdit(this)" onchange="setField('${p.id}','code',this.value)"></td>
+      <td>${optSelect(DB.options.factories, p.factory, `pickOpt('${p.id}','factory','factories',this)`, '添加厂家')}</td>
+      <td title="${esc(brandShow)}">${optSelect(DB.options.brands, p.brand, `pickBrand('${p.id}',this)`, '添加品牌商')}
+        ${p.brand==='联名款'?`<div style="font-size:11px;color:var(--accent);padding:0 8px 6px;cursor:pointer" onclick="openCoBrand('${p.id}')">${p.coBrand?esc(p.coBrand):'点击填写联名双方'}</div>`:''}</td>
+      <td><input value="${esc(p.name)}" placeholder="产品名称"
+            onfocus="beginEdit(this)" onchange="setField('${p.id}','name',this.value,this)"></td>
+      <td><input value="${esc(p.size)}" placeholder="尺寸"
+            onfocus="beginEdit(this)" onchange="setField('${p.id}','size',this.value)"></td>
+      <td>${optSelect(DB.options.materials, p.material, `pickOpt('${p.id}','material','materials',this)`, '添加材质')}</td>
+      ${miniGrid(p, WEIGHT_ROWS)}
+      ${miniGrid(p, TPL_ROWS)}
+      ${miniGrid(p, COST_ROWS)}
+      <td><input value="${esc(p.fee)}" placeholder="工费" data-ref="fee"
+            onfocus="beginEdit(this)" onmousedown="refClick(event,this)" onchange="setField('${p.id}','fee',this.value)"></td>
+      ${miniGrid(p, CALC_ROWS)}
+      <td class="price-col"><input value="${esc(p.price)}" placeholder="定价" data-ref="price"
+            onfocus="beginEdit(this)" onmousedown="refClick(event,this)" onchange="setField('${p.id}','price',this.value)"></td>
+      <td><div class="rise-cell ${rise.neg?'neg':''}">${rise.text}</div></td>
+      <td>${optSelect(DB.options.categories, p.category, `pickOpt('${p.id}','category','categories',this)`, '添加品类')}</td>
+      <td><input value="${esc(p.note)}" placeholder="备注"
+            onfocus="beginEdit(this)" onchange="setField('${p.id}','note',this.value)"></td>
+      <td class="del-cell"><button class="del-row" onclick="delProduct('${p.id}')">🗑</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="17" style="text-align:center;color:var(--sub);padding:30px;font-size:13px">暂无数据，点击右上角"＋ 新增一行"开始录入，或"📤 导入模板"批量导入</td></tr>`;
+
+  // 公式模板 datalist
+  let dl = document.getElementById('tpl-list');
+  if(!dl){ dl = document.createElement('datalist'); dl.id='tpl-list'; document.body.appendChild(dl); }
+  const tpls = new Set(['=[克重]*克价+[工费]','=[成本价]*2+20']);
+  DB.products.forEach(p=>{
+    [p.templateGold, p.templateSilver, p.template].forEach(v=>{ if(v) tpls.add(v); });
+  });
+  dl.innerHTML = [...tpls].map(t=>`<option value="${esc(t)}">`).join('');
+
+  // 选中产品时显示批量设置工具条
+  renderEntryBatchBar();
+}
+
+function riseOf(p){
+  const cost = parseFloat(p.costFormula ? p.costResult : p.cost);
+  const price = parseFloat(p.price);
+  if(!isFinite(cost) || !isFinite(price) || cost===0) return {text:'—', neg:false};
+  const r = (price-cost)/cost*100;
+  return { text: r.toFixed(2)+'%', neg: r<0 };
+}
+
+let editSnapshotTaken = false;
+function beginEdit(el){ editSnapshotTaken = false; }
+
+/* ============ 表头排序（录入 / 下单 / 对比 通用） ============ */
+/* sortState[key] = {key:列键, dir:1升序/-1降序}；null 表示不排序 */
+const sortState = { entry:null, order:null, cmp:null };
+function numOf(v){ const n=parseFloat(String(v==null?'':v).replace(/[^\d.\-]/g,'')); return isFinite(n)?n:null; }
+function brandShowOf(p){ return p.brand==='联名款'&&p.coBrand ? `联名款(${p.coBrand})` : (p.brand||''); }
+function riseNumOf(p){ const c=numOf(p.costFormula?p.costResult:p.cost), pr=numOf(p.price); return (c!==null&&pr!==null&&c!==0)?(pr-c)/c*100:null; }
+/* 每列表头对应的取值函数：返回 number 走数字排序，返回 string 走文字排序 */
+const SORT_KEYS = {
+  entry:{
+    code:p=>p.code||'', factory:p=>p.factory||'', brand:p=>brandShowOf(p), name:p=>p.name||'',
+    size:p=>numOf(p.size), material:p=>p.material||'',
+    weight:p=>numOf(p.weightFormula?p.weightResult:p.weight),
+    template:p=>p.template||'',
+    cost:p=>numOf(p.costFormula?p.costResult:p.cost),
+    fee:p=>numOf(p.fee), calc:p=>numOf(p.calcFormula?p.calcResult:p.calc),
+    price:p=>numOf(p.price), rise:p=>riseNumOf(p),
+    category:p=>p.category||'', note:p=>p.note||''
+  },
+  order:{
+    code:o=>o.code||'', factory:o=>o.factory||'', orderer:o=>o.orderer||'', product:o=>o.product||'', size:o=>numOf(o.size),
+    material:o=>orderProductMaterial(o.product)||'', stock:o=>numOf(o.stock),
+    saleStatus:o=>o.saleStatus||'', qty:o=>numOf(o.qty), date:o=>o.date||''
+  },
+  cmp:null  /* 复用 entry 的取值键 */
+};
+function sortRows(rows, table){
+  const st = sortState[table];
+  if(!st || !st.key) return rows;
+  const acc = (table==='cmp'?SORT_KEYS.entry:SORT_KEYS[table])[st.key];
+  if(!acc) return rows;
+  return rows.slice().sort((a,b)=>{
+    let va=acc(a), vb=acc(b);
+    const na=typeof va==='number', nb=typeof vb==='number';
+    // 空值（数字列 numOf 返回 null）统一排末尾，升序降序都如此
+    if(va==null && vb==null) return 0;
+    if(va==null) return 1;
+    if(vb==null) return -1;
+    if(na&&nb){ return (va-vb)*st.dir; }
+    va=String(va); vb=String(vb);
+    return va.localeCompare(vb,'zh')*st.dir;
+  });
+}
+function sortBy(table, key){
+  const st = sortState[table] || (sortState[table]={key:null,dir:1});
+  if(st.key===key){
+    // 升序 -> 降序 -> 取消（恢复默认顺序）
+    if(st.dir===1) st.dir=-1;
+    else sortState[table]=null;
+  } else { st.key=key; st.dir=1; }
+  if(table==='entry') renderEntry();
+  else if(table==='order') renderOrder();
+  else if(table==='cmp') renderCmpResult();
+  updateSortInd(table);
+}
+/* 取消排序，恢复默认顺序 */
+function clearSort(table){
+  sortState[table]=null;
+  if(table==='entry') renderEntry();
+  else if(table==='order') renderOrder();
+  else if(table==='cmp') renderCmpResult();
+  updateSortInd(table);
+}
+function updateSortInd(table){
+  const idMap={entry:'entry-table',order:'order-table',cmp:'cmp-tbl'};
+  const tbl=document.getElementById(idMap[table]); if(!tbl) return;
+  const st=sortState[table];
+  tbl.querySelectorAll('th.sortable').forEach(th=>{
+    const ind=th.querySelector('.sort-ind'); if(!ind) return;
+    if(st && st.key===th.dataset.sort){
+      th.classList.toggle('sort-asc', st.dir===1);
+      th.classList.toggle('sort-desc', st.dir===-1);
+      ind.textContent = st.dir===1?'▲':'▼';
+    } else {
+      th.classList.remove('sort-asc','sort-desc');
+      ind.textContent='⇅';
+    }
+  });
+}
+/* 对比弹窗表头：生成可排序 th（含当前排序指示） */
+function cmpTh(label,key){
+  const st=sortState.cmp; const active=st&&st.key===key;
+  const cls='sortable'+(active?(' sort-'+(st.dir===1?'asc':'desc')):'');
+  const ind=active?(st.dir===1?'▲':'▼'):'⇅';
+  return `<th class="${cls}" data-sort="${key}" onclick="sortBy('cmp','${key}',this)">${label}<span class="sort-ind">${ind}</span></th>`;
+}
+
+// 录入页选中态（跨筛选/搜索持久化，用于批量删除与一键下单）
+let selectedIds = new Set();
+// 下单页选中态
+let orderSelIds = new Set();
+function setField(id, key, val, el){
+  const p = DB.products.find(x=>x.id===id); if(!p) return;
+  if(p[key]===val) return;
+  snapshot();
+  p[key] = val;
+  recalcCalc(p);
+  // 产品名称查重
+  if(key==='name' && val.trim()){
+    const dup = DB.products.some(x=>x.id!==id && x.name.trim()===val.trim());
+    if(dup){
+      if(el) el.classList.add('dup-warn');
+      toast(`⚠️ 产品名称"${val}"已存在，请注意重复！`);
+    } else if(el) el.classList.remove('dup-warn');
+  }
+  save(); renderEntry();
+}
+
+/* 下拉选择（含"添加新选项"） */
+function pickOpt(id, key, optKey, sel){
+  if(sel.value==='__ADD__'){
+    const label = {factories:'厂家', materials:'材质', categories:'品类', orderers:'下单人', brands:'品牌商'}[optKey];
+    const nv = prompt('请输入新的'+label+'名称：');
+    if(nv && nv.trim()){
+      snapshot();
+      if(!DB.options[optKey].includes(nv.trim())) DB.options[optKey].push(nv.trim());
+      const p = DB.products.find(x=>x.id===id);
+      if(p) p[key] = nv.trim();
+      save();
+    }
+    renderEntry(); return;
+  }
+  setField(id, key, sel.value);
+}
+function pickBrand(id, sel){
+  if(sel.value==='__ADD__'){
+    const nv = prompt('请输入新的品牌商名称：');
+    if(nv && nv.trim()){
+      snapshot();
+      if(!DB.options.brands.includes(nv.trim())) DB.options.brands.push(nv.trim());
+      const p = DB.products.find(x=>x.id===id); if(p) p.brand = nv.trim();
+      save();
+    }
+    renderEntry(); return;
+  }
+  const p = DB.products.find(x=>x.id===id); if(!p) return;
+  snapshot();
+  p.brand = sel.value;
+  save();
+  if(sel.value==='联名款'){ openCoBrand(id); }
+  renderEntry();
+}
+
+/* 联名款 */
+let coBrandTarget = null;
+function openCoBrand(id){
+  coBrandTarget = id;
+  const p = DB.products.find(x=>x.id===id);
+  const parts = (p && p.coBrand) ? p.coBrand.split('×') : ['',''];
+  document.getElementById('co-a').value = parts[0]||'';
+  document.getElementById('co-b').value = parts[1]||'';
+  document.getElementById('co-mask').classList.add('show');
+}
+function confirmCoBrand(){
+  const a = document.getElementById('co-a').value.trim();
+  const b = document.getElementById('co-b').value.trim();
+  if(!a || !b){ toast('请填写联名双方'); return; }
+  const name = a+'×'+b;
+  snapshot();
+  const p = DB.products.find(x=>x.id===coBrandTarget);
+  if(p) p.coBrand = name;
+  DB.options.coBrands = DB.options.coBrands||[];
+  if(!DB.options.coBrands.includes(name)) DB.options.coBrands.push(name);
+  save(); closeModal('co-mask'); renderEntry();
+  toast('联名品牌"'+name+'"已加入筛选项');
+}
+
+/* ---------- Excel式公式单元格 ---------- */
+let activeFormulaInput = null;
+function formulaFocus(el, id, field){
+  const p = DB.products.find(x=>x.id===id); if(!p) return;
+  const f = p[field+'Formula'];
+  if(f) el.value = f;              // 编辑时显示公式
+  activeFormulaInput = el;
+  el.dataset.pid = id;
+}
+function formulaBlur(el, id, field){
+  // 延迟，允许 refClick 先触发
+  setTimeout(()=>{
+    if(activeFormulaInput===el) activeFormulaInput=null;
+  }, 250);
+  const p = DB.products.find(x=>x.id===id); if(!p) return;
+  const v = el.value.trim();
+  const fKey = field+'Formula', rKey = field+'Result';
+  if(v.startsWith('=')){
+    if(p[fKey]===v && p[rKey]!==''){ el.value = p[rKey]; return; }
+    snapshot();
+    p[fKey] = v; p[rKey] = ''; p[field] = '';
+  } else {
+    if(p[fKey]==='' && p[field]===v) return;
+    snapshot();
+    p[fKey] = ''; p[rKey] = ''; p[field] = v;
+  }
+  recalcCalc(p);                // 重算 金/银/总和 依赖链
+  save(); renderEntry();
+}
+/* 点选任意单元格 → 往公式里插入引用。
+   同一产品行(以 tr[data-id] 锚定，兼容迷你网格的嵌套 table)内的任何数字格均可引用，
+   支持 克重-金/银/总、成本价-金/银/总、计算位-金/银/总、工费、定价 等。
+   仅当公式格已手动输入 "=" 时才允许插入引用；未输入 "=" 时按普通数值处理，不进入公式、不自动计算。 */
+function refClick(ev, el){
+  if(!activeFormulaInput || activeFormulaInput===el || !el.dataset.ref) return;
+  if(el.closest('tr[data-id]') !== activeFormulaInput.closest('tr[data-id]')) return; // 仅限同一产品
+  if(!activeFormulaInput.value.startsWith('=')) return;   // 必须先手动输入 = 才启用引用/公式
+  const name = REF_FIELDS[el.dataset.ref];
+  if(!name) return;
+  ev.preventDefault();
+  activeFormulaInput.value += '['+name+']';
+  activeFormulaInput.focus();
+}
+
+/* ---------- 对比 ---------- */
+const cmpSelected = new Set();
+function openCompare(){
+  if(!DB.products.length){ toast('还没有录入任何产品'); return; }
+  fillFilter('cmp-f-factory', DB.options.factories, '厂家');
+  fillFilter('cmp-f-material', DB.options.materials, '材质');
+  fillFilter('cmp-f-brand', brandFilterList(), '品牌商');
+  document.getElementById('cmp-search').value='';
+  document.getElementById('cmp-f-factory').value='';
+  document.getElementById('cmp-f-material').value='';
+  document.getElementById('cmp-f-brand').value='';
+  renderCmpPick(); renderCmpResult();
+  document.getElementById('cmp-mask').classList.add('show');
+}
+function clearCmpFilter(){
+  document.getElementById('cmp-search').value='';
+  document.getElementById('cmp-f-factory').value='';
+  document.getElementById('cmp-f-material').value='';
+  document.getElementById('cmp-f-brand').value='';
+  renderCmpPick();
+}
+function renderCmpPick(){
+  const q = (document.getElementById('cmp-search').value||'').trim().toLowerCase();
+  const f = document.getElementById('cmp-f-factory').value;
+  const m = document.getElementById('cmp-f-material').value;
+  const b = document.getElementById('cmp-f-brand').value;
+  const list = DB.products.filter(p=>{
+    if(f && p.factory!==f) return false;
+    if(m && p.material!==m) return false;
+    if(b){
+      if(b==='联名款'){ if(p.brand!=='联名款') return false; }
+      else if(p.brand!==b && p.coBrand!==b) return false;
+    }
+    if(q){
+      const hay = ((p.code||'')+' '+(p.name||'')+' '+(p.factory||'')+' '+(p.brand||'')+' '+(p.coBrand||'')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  document.getElementById('cmp-pick').innerHTML = list.length
+    ? list.map(p=>`
+    <div class="pick-item ${cmpSelected.has(p.id)?'on':''}" onclick="toggleCmp('${p.id}')">
+      <input type="checkbox" ${cmpSelected.has(p.id)?'checked':''} style="pointer-events:none">
+      <span>${esc(p.name)||'(未命名)'} <span class="hint">${esc(p.factory)} ${esc(p.material)}</span></span>
+    </div>`).join('')
+    : '<div class="hint" style="padding:8px 0">没有符合筛选条件的产品</div>';
+}
+function toggleCmp(id){
+  cmpSelected.has(id) ? cmpSelected.delete(id) : cmpSelected.add(id);
+  renderCmpPick(); renderCmpResult();
+}
+function cmpBreak(p, goldF, silverF, totalF){
+  const g = p[goldF+'Formula']?p[goldF+'Result']:p[goldF];
+  const s = p[silverF+'Formula']?p[silverF+'Result']:p[silverF];
+  const t = p[totalF+'Formula']?p[totalF+'Result']:p[totalF];
+  const parts = [];
+  if(g!==''&&g!=null) parts.push('金 '+esc(g));
+  if(s!==''&&s!=null) parts.push('银 '+esc(s));
+  parts.push('总 '+esc(t));
+  return parts.join(' / ');
+}
+function renderCmpResult(){
+  let list = DB.products.filter(p=>cmpSelected.has(p.id));
+  const box = document.getElementById('cmp-result');
+  if(!list.length){ box.innerHTML = '<div class="hint">勾选产品后，将在此处列出所选产品全部信息</div>'; return; }
+  list = sortRows(list, 'cmp');
+  box.innerHTML = `<div class="tbl-wrap"><table class="cmp-tbl">
+    <thead><tr>
+      ${cmpTh('主商家编码','code')}${cmpTh('厂家','factory')}${cmpTh('品牌商','brand')}${cmpTh('产品名称','name')}
+      ${cmpTh('尺寸','size')}${cmpTh('材质','material')}${cmpTh('克重(金/银/总)','weight')}${cmpTh('算法公式模板(金/银/总)','template')}
+      ${cmpTh('成本价(金/银/总)','cost')}${cmpTh('工费','fee')}${cmpTh('计算位(金/银/总和)','calc')}${cmpTh('定价','price')}
+      ${cmpTh('涨幅','rise')}${cmpTh('品类','category')}${cmpTh('备注','note')}
+    </tr></thead>
+    <tbody>${list.map(p=>{
+      const brandShow = p.brand==='联名款'&&p.coBrand ? '联名款('+p.coBrand+')' : p.brand;
+      const g = p.calcGoldFormula?p.calcGoldResult:p.calcGold;
+      const s = p.calcSilverFormula?p.calcSilverResult:p.calcSilver;
+      const t = p.calcFormula?p.calcResult:p.calc;
+      const calcParts = [];
+      if(g!==''&&g!=null) calcParts.push('金 '+esc(g));
+      if(s!==''&&s!=null) calcParts.push('银 '+esc(s));
+      calcParts.push('总 '+esc(t));
+      return `<tr><td>${esc(p.code||'')}</td><td>${esc(p.factory)}</td><td>${esc(brandShow)}</td><td><b>${esc(p.name)}</b></td>
+      <td>${esc(p.size)}</td><td>${esc(p.material)}</td>
+      <td>${cmpBreak(p,'weightGold','weightSilver','weight')}</td>
+      <td>${cmpBreak(p,'templateGold','templateSilver','template')}</td>
+      <td>${cmpBreak(p,'costGold','costSilver','cost')}</td>
+      <td>${esc(p.fee)}</td>
+      <td>${calcParts.join(' / ')}</td><td>${esc(p.price)}</td>
+      <td>${riseOf(p).text}</td><td>${esc(p.category)}</td><td>${esc(p.note)}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+function closeModal(id){ document.getElementById(id).classList.remove('show'); if(id==='dup-mask') clearDupFlash(); }
+
+/* ================= 下单页 ================= */
+function addOrderRow(){
+  if(DB.orderMeta.locked){ toast('表格已提交锁定，请先点击"修改"'); return; }
+  snapshot();
+  DB.orders.push({ id: uid(), code:'', factory:'', orderer:'', product:'', stock:'', saleStatus:'', qty:'', date: today() });
+  save(); renderOrder();
+}
+function delOrder(id){
+  if(DB.orderMeta.locked){ toast('表格已提交锁定，请先点击"修改"'); return; }
+  if(!confirm('确定删除该条下单记录？')) return;
+  snapshot();
+  DB.orders = DB.orders.filter(o=>o.id!==id);
+  save(); renderOrder();
+}
+function clearOrderFilters(){ document.getElementById('f-orderer').value=''; document.getElementById('f-ofactory').value=''; document.getElementById('f-omaterial').value=''; renderOrder(); }
+function onOrderCheck(el, id){
+  if(el.checked) orderSelIds.add(id); else orderSelIds.delete(id);
+}
+function toggleOrderAll(el){
+  document.querySelectorAll('#order-table .orow-check').forEach(c=>{
+    c.checked = el.checked;
+    const id = c.dataset.id;
+    if(el.checked) orderSelIds.add(id); else orderSelIds.delete(id);
+  });
+}
+function batchDeleteOrder(){
+  if(DB.orderMeta && DB.orderMeta.locked){ toast('表格已提交锁定，请先点击"修改"解锁'); return; }
+  const ids = [...document.querySelectorAll('#order-table .orow-check:checked')].map(c=>c.dataset.id);
+  if(!ids.length){ toast('请先勾选要删除的下单'); return; }
+  if(!confirm(`确定批量删除选中的 ${ids.length} 条下单记录？此操作可通过 Ctrl+Z 撤销`)) return;
+  snapshot();
+  DB.orders = DB.orders.filter(o=>!ids.includes(o.id));
+  ids.forEach(id=>orderSelIds.delete(id));
+  save(); renderOrder();
+  toast(`已删除 ${ids.length} 条下单记录`);
+}
+
+/* 选中下单行的批量属性设置工具条 */
+function fillSelectKeep(id, list){
+  const sel = document.getElementById(id);
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">— 不修改 —</option>` + list.map(o=>`<option>${esc(o)}</option>`).join('');
+  sel.value = cur; // 保留用户已选值，避免 re-render 时清空
+}
+/* 下单记录按产品名称回查其材质（用于"材质"筛选） */
+function orderProductMaterial(name){
+  if(!name) return '';
+  const p = DB.products.find(x=>x.name===name);
+  return p ? p.material : '';
+}
+/* 下单表"材质"列：下拉显示并回写关联录入产品的材质 */
+function orderMaterialSel(o, locked){
+  const p = DB.products.find(x=>x.name===o.product);
+  const cur = p ? p.material : '';
+  let html = `<select onchange="setProductMaterial('${o.id}',this)"${locked?' disabled':''}>`;
+  html += `<option value="">—</option>`;
+  DB.options.materials.forEach(m=> html += `<option${m===cur?' selected':''}>${esc(m)}</option>`);
+  html += '</select>';
+  return html;
+}
+function setProductMaterial(id, sel){
+  const o = DB.orders.find(x=>x.id===id);
+  if(!o || !o.product) return;
+  const p = DB.products.find(x=>x.name===o.product);
+  if(!p) return;
+  snapshot();
+  p.material = sel.value;
+  save(); renderOrder();
+}
+/* 下单表"尺寸"列：input 显示并回写关联录入产品的尺寸 */
+function orderSizeInput(o, locked){
+  const p = DB.products.find(x=>x.name===o.product);
+  const v = p ? (p.size||'') : '';
+  return `<input value="${esc(v)}" placeholder="尺寸"${locked?' disabled':''} onchange="setProductSize('${o.id}',this.value)">`;
+}
+function setProductSize(id, val){
+  const o = DB.orders.find(x=>x.id===id);
+  if(!o || !o.product) return;
+  const p = DB.products.find(x=>x.name===o.product);
+  if(!p) return;
+  snapshot();
+  p.size = val;
+  save(); renderOrder();
+}
+/* 当日下单记录展示（底部） */
+function renderTodayOrders(){
+  const box = document.getElementById('today-orders');
+  if(!box) return;
+  const t = today();
+  const submitted = DB.orderHistory.filter(r=>r.date===t);
+  // 当前未提交的今日草稿（仅在非"修改已提交记录"状态下计入，避免与历史重复）
+  let drafts = [];
+  const editingSubmitted = DB.orderMeta.recordId && DB.orderHistory.some(r=>r.id===DB.orderMeta.recordId);
+  if(!DB.orderMeta.locked && !editingSubmitted){
+    drafts = DB.orders.filter(o=>o.date===t && (o.product||o.factory||o.qty));
+  }
+  if(!submitted.length && !drafts.length){
+    box.innerHTML = '<div class="hint">今日（'+t+'）暂无下单记录。</div>';
+    return;
+  }
+  let rows = [];
+  submitted.forEach(r=> r.rows.forEach(o=> rows.push(Object.assign({}, o, {
+    _tag: r.voided?'已作废':'已提交', _voided: !!r.voided, _voidReason: r.voidReason||'', _recId: r.id }))));
+  drafts.forEach(o=> rows.push(Object.assign({}, o, {_tag:'草稿', _voided:false, _voidReason:'', _recId:''})));
+  box.innerHTML = `
+    <div class="today-head">📋 当日下单记录 · ${t} · 共 ${rows.length} 条
+      <span class="hint" style="font-weight:400">（✅ 已提交 · ❌ 已作废 · （草稿）未提交）</span></div>
+    <div class="tbl-wrap"><table class="cmp-tbl" style="min-width:760px">
+      <thead><tr><th style="width:13%">状态</th><th style="width:14%">厂家</th><th style="width:13%">下单人</th><th style="width:22%">产品名称</th><th class="col-center" style="width:13%">目前库存</th><th class="col-center" style="width:14%">预售单量</th><th class="qty-col-disp col-center" style="width:10%">下单数量</th><th class="col-center" style="width:13%">下单日期</th></tr></thead>
+      <tbody>${rows.map(o=>{
+        const st = o._tag==='已提交'
+          ? `✅ 已提交${o._recId?` <button class="mini-btn" onclick="openVoidModal('${o._recId}')">作废</button>`:''}`
+          : o._tag==='已作废'
+          ? `❌ 已作废<div class="void-reason">${esc(o._voidReason)}</div>`
+          : '(草稿)未提交';
+        return `<tr class="${o._voided?'void-row':''}"><td>${st}</td><td>${esc(o.factory)}</td><td>${esc(o.orderer)}</td><td><b>${esc(o.product)}</b></td><td class="col-center">${esc(o.stock)}</td><td class="col-center">${esc(o.saleStatus)}</td><td class="qty-col-disp col-center">${esc(o.qty)}</td><td class="col-center">${esc(o.date)}</td></tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+function renderOrder(){
+  fillFilter('f-orderer', DB.options.orderers, '下单人');
+  fillFilter('f-ofactory', DB.options.factories, '厂家');
+  fillFilter('f-omaterial', DB.options.materials, '材质');
+  const fo = document.getElementById('f-orderer').value;
+  const ff = document.getElementById('f-ofactory').value;
+  const fm = document.getElementById('f-omaterial').value;
+  let rows = DB.orders.filter(o=>(!fo||o.orderer===fo)&&(!ff||o.factory===ff)&&(!fm||orderProductMaterial(o.product)===fm));
+  rows = sortRows(rows, 'order');
+  document.getElementById('order-count').textContent = `显示 ${rows.length} / 共 ${DB.orders.length} 条`;
+
+  const locked = DB.orderMeta.locked;
+  const dis = locked ? ' disabled' : '';
+  document.getElementById('btn-add-order').style.display = locked?'none':'';
+  document.getElementById('btn-submit-order').style.display = locked?'none':'';
+  document.getElementById('btn-modify-order').style.display = locked?'':'none';
+  document.getElementById('btn-batch-order').style.display = locked?'none':'';
+  const st = document.getElementById('order-status');
+  const rec = DB.orderHistory.find(r=>r.id===DB.orderMeta.recordId);
+  if(locked && rec){
+    st.className = 'order-status show locked';
+    st.innerHTML = `🔒 本次下单已于 <b>${esc(rec.submittedAt)}</b> 提交并留存本地，表格已锁定不可修改。如需更改请点击右上角"✏️ 修改"。`;
+  } else if(!locked && rec){
+    st.className = 'order-status show editing';
+    st.innerHTML = `✏️ 修改中：完成后请再次点击"✅ 提交"，新记录将<b>覆盖</b>原提交记录（${esc(rec.submittedAt)}）。`;
+  } else {
+    st.className = 'order-status';
+    st.innerHTML = '';
+  }
+
+  // 清理已不存在的选中项，并初始化列宽拖拽
+  [...orderSelIds].forEach(id=>{ if(!DB.orders.some(o=>o.id===id)) orderSelIds.delete(id); });
+  initColResize('order-table','order');
+  renderTodayOrders();
+
+  document.getElementById('order-body').innerHTML = rows.map(o=>`<tr data-id="${o.id}"${orderSelIds.has(o.id)?' class="sel"':''}>
+    <td class="chk-col"><input type="checkbox" class="orow-check" data-id="${o.id}"${orderSelIds.has(o.id)?' checked':''}${dis} onchange="onOrderCheck(this,'${o.id}')"></td>
+    <td style="position:relative"><input value="${esc(o.code||'')}" placeholder="编码/名称可搜产品"${dis}
+        oninput="codeSuggest(this,'${o.id}')" onfocus="codeSuggest(this,'${o.id}')"
+        onblur="setTimeout(()=>hideSug(),200)" onchange="setOrderField('${o.id}','code',this.value)"></td>
+    <td>${orderSel(o.id,'factory',DB.options.factories,o.factory,'添加厂家','factories',locked)}</td>
+    <td>${orderSel(o.id,'orderer',DB.options.orderers,o.orderer,'添加下单人','orderers',locked)}</td>
+    <td class="prod-cell" style="position:relative"><input value="${esc(o.product)}" placeholder="输入关键字模糊搜索产品"${dis}
+        oninput="prodSuggest(this,'${o.id}');prodDupLive(this,'${o.id}')" onfocus="prodSuggest(this,'${o.id}')"
+        onblur="setTimeout(()=>hideSug(),200)" onchange="setOrderField('${o.id}','product',this.value)"></td>
+    <td class="col-center">${orderSizeInput(o, locked)}</td>
+    <td class="col-center">${orderMaterialSel(o, locked)}</td>
+    <td class="col-center"><input value="${esc(o.stock)}"${dis} onchange="setOrderField('${o.id}','stock',this.value)"></td>
+    <td class="col-center"><input value="${esc(o.saleStatus)}"${dis} onchange="setOrderField('${o.id}','saleStatus',this.value)"></td>
+    <td class="qty-col col-center"><input value="${esc(o.qty)}"${dis} onchange="setOrderField('${o.id}','qty',this.value)"></td>
+    <td class="col-center"><input value="${esc(o.date)}"${dis} onchange="setOrderField('${o.id}','date',this.value)"></td>
+    <td class="del-cell">${locked?'🔒':`<button class="del-row" onclick="delOrder('${o.id}')">🗑</button>`}</td>
+  </tr>`).join('') || `<tr><td colspan="12" style="text-align:center;color:var(--sub);padding:30px;font-size:13px">暂无下单记录，点击右上角"＋ 新增一行"</td></tr>`;
+  updateSortInd('order');
+}
+
+/* ---------- 提交 / 修改 / 新建 ---------- */
+function submitOrder(){
+  if(DB.orderMeta.locked){ toast('已提交，如需更改请点"修改"'); return; }
+  const valid = DB.orders.filter(o=>o.product||o.factory||o.qty);
+  if(!valid.length){ toast('请先添加下单内容再提交'); return; }
+  snapshot();
+  const isOverwrite = !!DB.orderMeta.recordId && DB.orderHistory.some(r=>r.id===DB.orderMeta.recordId);
+  const rec = {
+    id: DB.orderMeta.recordId || uid(),
+    date: today(),
+    submittedAt: new Date().toLocaleString('zh-CN'),
+    rows: JSON.parse(JSON.stringify(DB.orders))
+  };
+  const idx = DB.orderHistory.findIndex(r=>r.id===rec.id);
+  if(idx>=0) DB.orderHistory[idx] = rec; else DB.orderHistory.push(rec);
+  DB.orderMeta = { locked:true, recordId: rec.id };
+  save(); renderOrder();
+  toast(isOverwrite ? '✅ 已重新提交，新记录已覆盖旧记录' : '✅ 已提交并留存本地，表格已锁定');
+}
+function modifyOrder(){
+  if(!DB.orderMeta.locked) return;
+  snapshot();
+  DB.orderMeta.locked = false;
+  save(); renderOrder();
+  toast('已解锁，修改完成后请再次点击"提交"');
+}
+function newOrder(){
+  if(DB.orders.length && !DB.orderMeta.locked
+     && !confirm('当前表格尚未提交，新建下单将清空当前表格（已提交的历史记录不受影响），确定继续？')) return;
+  if(DB.orders.length && DB.orderMeta.locked
+     && !confirm('开始一张新的下单表？当前已提交的记录已留存，可随时在"📅 查询"中查看。')) return;
+  snapshot();
+  DB.orders = [];
+  DB.orderMeta = { locked:false, recordId:null };
+  save(); renderOrder();
+  addOrderRow();
+}
+
+/* ---------- 草稿箱 ---------- */
+function saveOrderDraft(){
+  const has = DB.orders.some(o=>o.product||o.factory||o.qty||o.code||o.stock||o.saleStatus);
+  if(!has){ toast('当前没有可保存的下单内容'); return; }
+  DB.orderDrafts.unshift({ id: uid(), savedAt: new Date().toLocaleString('zh-CN'), date: today(), rows: JSON.parse(JSON.stringify(DB.orders)) });
+  save();
+  toast(`已保存到草稿箱（共 ${DB.orderDrafts.length} 条草稿）`);
+}
+function openDraftBox(){ renderDraftBox(); document.getElementById('draft-mask').classList.add('show'); }
+function renderDraftBox(){
+  const box = document.getElementById('draft-list');
+  if(!DB.orderDrafts.length){
+    box.innerHTML = '<div class="hint" style="text-align:center;padding:24px">暂无草稿，点上方「💾 保存」可把当前下单内容存入。</div>';
+    return;
+  }
+  box.innerHTML = DB.orderDrafts.map(d=>{
+    const n = d.rows.length;
+    const names = d.rows.filter(r=>r.product).map(r=>r.product).slice(0,3).join('、');
+    const extra = d.rows.filter(r=>r.product).length>3 ? ' 等' : '';
+    return `<div class="draft-card">
+      <div class="draft-meta"><b>保存于 ${esc(d.savedAt)}</b><span class="hint">${esc(d.date)} · 共 ${n} 条</span></div>
+      <div class="draft-detail">${names?('产品：'+esc(names)+extra):'(无产品名)'}</div>
+      <div class="draft-ops">
+        <button class="btn btn-primary" style="padding:5px 14px" onclick="loadDraft('${d.id}')">调取</button>
+        <button class="btn btn-danger" style="padding:5px 14px" onclick="delDraft('${d.id}')">删除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function loadDraft(id){
+  const d = DB.orderDrafts.find(x=>x.id===id); if(!d) return;
+  if(DB.orders.length && !confirm('调取该草稿将覆盖当前下单内容，是否继续？')) return;
+  snapshot();
+  DB.orders = JSON.parse(JSON.stringify(d.rows));
+  DB.orderMeta = { locked:false, recordId:null };
+  save(); closeModal('draft-mask'); renderOrder();
+  toast('已调取草稿，可编辑后提交');
+}
+function delDraft(id){
+  DB.orderDrafts = DB.orderDrafts.filter(x=>x.id!==id);
+  save(); renderDraftBox();
+}
+
+/* ---------- 日历查询 ---------- */
+let calY, calM, calSel = null;
+function openCalendar(){
+  const d = new Date();
+  calY = d.getFullYear(); calM = d.getMonth(); calSel = null;
+  renderCal();
+  document.getElementById('cal-mask').classList.add('show');
+}
+function calShift(n){
+  calM += n;
+  if(calM<0){ calM=11; calY--; }
+  if(calM>11){ calM=0; calY++; }
+  renderCal();
+}
+function renderCal(){
+  document.getElementById('cal-title').textContent = calY+' 年 '+(calM+1)+' 月';
+  const marked = new Set(DB.orderHistory.map(r=>r.date));
+  const startDow = new Date(calY,calM,1).getDay();
+  const days = new Date(calY,calM+1,0).getDate();
+  const tod = today();
+  let html = ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-wd">${w}</div>`).join('');
+  for(let i=0;i<startDow;i++) html += '<div></div>';
+  for(let d=1;d<=days;d++){
+    const ds = calY+'-'+String(calM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    html += `<div class="cal-cell${ds===tod?' today':''}${ds===calSel?' sel':''}" onclick="calPick('${ds}')">${d}${marked.has(ds)?'<span class="cal-dot"></span>':''}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  renderCalDetail();
+}
+function calPick(ds){ calSel = ds; renderCal(); }
+/* ---------- 作废已提交的记录（保留留痕） ---------- */
+let voidTargetId = null;
+function openVoidModal(id){
+  const rec = DB.orderHistory.find(r=>r.id===id);
+  if(!rec || rec.voided){ return; }
+  voidTargetId = id;
+  const ta = document.getElementById('void-reason');
+  if(ta) ta.value = '';
+  const err = document.getElementById('void-err');
+  if(err) err.textContent = '';
+  document.getElementById('void-mask').classList.add('show');
+  if(ta) setTimeout(()=>ta.focus(), 60);
+}
+function confirmVoid(){
+  const ta = document.getElementById('void-reason');
+  const reason = ta ? ta.value.trim() : '';
+  const err = document.getElementById('void-err');
+  if(!reason){ if(err) err.textContent = '请填写作废理由（必填）'; return; }
+  if(!voidTargetId) return;
+  const rec = DB.orderHistory.find(r=>r.id===voidTargetId);
+  if(!rec){ closeModal('void-mask'); return; }
+  snapshot();
+  rec.voided = true;
+  rec.voidReason = reason;
+  rec.voidedAt = new Date().toLocaleString('zh-CN');
+  save();
+  closeModal('void-mask');
+  voidTargetId = null;
+  renderCalDetail(); renderTodayOrders();
+  toast('已作废该记录（已留痕，查询仍可见）');
+}
+function renderCalDetail(){
+  const box = document.getElementById('cal-detail');
+  if(!calSel){ box.innerHTML = '<div class="hint">点击日期查看当天下单记录（🟢 绿点 = 有记录）</div>'; return; }
+  const recs = DB.orderHistory.filter(r=>r.date===calSel);
+  if(!recs.length){ box.innerHTML = `<div class="hint">${calSel} 没有下单记录</div>`; return; }
+  box.innerHTML = recs.map(r=>`
+    <div style="margin-top:12px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">📦 ${esc(r.date)} 下单记录
+        <span class="hint" style="font-weight:400">提交时间：${esc(r.submittedAt)} · 共 ${r.rows.length} 项</span>
+        ${r.voided
+          ? '<span class="void-badge">❌ 已作废</span>'
+          : '<button class="mini-btn" onclick="openVoidModal(\''+r.id+'\')">作废</button>'}
+      </div>
+      ${r.voided ? `<div class="void-reason-box">作废理由：${esc(r.voidReason||'')}${r.voidedAt?' · 作废时间：'+esc(r.voidedAt):''}</div>` : ''}
+      <div class="tbl-wrap"><table class="cmp-tbl" style="min-width:760px">
+        <thead><tr><th>厂家</th><th>下单人</th><th>产品名称</th><th class="col-center">目前库存</th><th class="col-center">预售单量</th><th class="qty-col-disp col-center">下单数量</th><th class="col-center">下单日期</th></tr></thead>
+        <tbody>${r.rows.map(o=>`<tr><td>${esc(o.factory)}</td><td>${esc(o.orderer)}</td><td>${esc(o.product)}</td><td class="col-center">${esc(o.stock)}</td><td class="col-center">${esc(o.saleStatus)}</td><td class="qty-col-disp col-center">${esc(o.qty)}</td><td class="col-center">${esc(o.date)}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>`).join('');
+}
+function orderSel(id, key, list, val, addLabel, optKey, locked){
+  let html = `<select onchange="pickOrderOpt('${id}','${key}','${optKey}',this)"${locked?' disabled':''}>`;
+  html += `<option value=""${val?'':' selected'}>请选择</option>`;
+  list.forEach(o=>html+=`<option${o===val?' selected':''}>${esc(o)}</option>`);
+  html += `<option value="__ADD__">＋ ${addLabel}…</option></select>`;
+  return html;
+}
+function pickOrderOpt(id, key, optKey, sel){
+  if(sel.value==='__ADD__'){
+    const label = {factories:'厂家', orderers:'下单人'}[optKey];
+    const nv = prompt('请输入新的'+label+'名称：');
+    if(nv && nv.trim()){
+      snapshot();
+      if(!DB.options[optKey].includes(nv.trim())) DB.options[optKey].push(nv.trim());
+      const o = DB.orders.find(x=>x.id===id); if(o) o[key]=nv.trim();
+      save();
+    }
+    renderOrder(); return;
+  }
+  setOrderField(id, key, sel.value);
+}
+function setOrderField(id, key, val){
+  if(DB.orderMeta.locked){ toast('表格已提交锁定，请先点击"修改"'); renderOrder(); return; }
+  // 点选产品/编码后，旧输入框的 onchange 带着旧关键字触发，此处吞掉这一次，避免覆盖已选值
+  if(suppressOC && suppressOC.id===id && suppressOC.key===key){ suppressOC=null; return; }
+  const o = DB.orders.find(x=>x.id===id); if(!o||o[key]===val) return;
+  snapshot(); o[key]=val; save();
+  if(key==='factory'||key==='orderer') renderOrder();
+  // 产品名提交后检测本次下单中的重复项
+  if(key==='product') flagOrderDup(id);
+}
+/* 订单内产品名查重：弹窗 + 重复位置闪烁 */
+function clearDupFlash(){
+  document.querySelectorAll('#order-body .dup-flash').forEach(el=>el.classList.remove('dup-flash'));
+}
+function closeDupModal(){
+  clearDupFlash();
+  closeModal('dup-mask');
+}
+function rowVisualNo(did){
+  const trs = [...document.querySelectorAll('#order-body tr[data-id]')];
+  const i = trs.findIndex(t=>t.getAttribute('data-id')===did);
+  return i>=0 ? i+1 : 0;
+}
+/* 输入过程中实时检测重复：填到与本次已填产品名完全一致时，立即标红并弹窗 */
+function prodDupLive(input, oid){
+  const cell = input.closest('.prod-cell');
+  const name = input.value.trim();
+  if(!name){ if(cell) cell.classList.remove('dup-live'); return; }
+  const dup = DB.orders.some(x=>x.id!==oid && (x.product||'').trim()===name);
+  if(dup){
+    if(cell) cell.classList.add('dup-live');
+    const mask = document.getElementById('dup-mask');
+    if(mask && !mask.classList.contains('show')) flagOrderDup(oid, name);
+  } else if(cell) cell.classList.remove('dup-live');
+}
+function flagOrderDup(id, nameOverride){
+  const o = DB.orders.find(x=>x.id===id); if(!o) return;
+  const name = (nameOverride!=null ? String(nameOverride) : (o.product||'')).trim();
+  if(!name) return;
+  const dups = DB.orders.filter(x=>x.id!==id && (x.product||'').trim()===name);
+  if(!dups.length) return;
+  clearDupFlash();
+  const ids = [o.id, ...dups.map(d=>d.id)];
+  ids.forEach(did=>{
+    const cell = document.querySelector(`#order-body tr[data-id="${did}"] .prod-cell`);
+    if(cell) cell.classList.add('dup-flash');
+  });
+  const me = rowVisualNo(id);
+  const others = dups.map(d=>rowVisualNo(d.id));
+  document.getElementById('dup-msg').textContent =
+    `产品名称「${name}」在本次下单中已填写 ${dups.length+1} 次（含当前第 ${me} 行），与第 ${others.join('、')} 行重复。`;
+  document.getElementById('dup-mask').classList.add('show');
+}
+/* 产品模糊搜索 */
+let sugBox = null;
+/* 防止点选产品/编码后，旧输入框 blur 触发的 onchange 用旧关键字覆盖已选值 */
+let suppressOC = null;
+function prodSuggest(input, oid){
+  hideSug();
+  const kw = input.value.trim();
+  const names = [...new Set(DB.products.map(p=>p.name).filter(Boolean))];
+  const list = kw ? names.filter(n=>n.includes(kw)) : names;
+  if(!list.length) return;
+  sugBox = document.createElement('div');
+  sugBox.className = 'sug-box';
+  sugBox.innerHTML = list.slice(0,30).map(n=>`<div class="sug-item" onmousedown="chooseProd('${oid}','${esc(n)}')">${esc(n)}</div>`).join('');
+  const r = input.getBoundingClientRect();
+  sugBox.style.position='fixed';
+  sugBox.style.left = r.left+'px';
+  sugBox.style.top = (r.bottom+2)+'px';
+  sugBox.style.width = Math.max(r.width,180)+'px';
+  document.body.appendChild(sugBox);
+}
+function hideSug(){ if(sugBox){ sugBox.remove(); sugBox=null; } }
+function chooseProd(oid, name){
+  const o = DB.orders.find(x=>x.id===oid); if(!o) return;
+  snapshot(); o.product = name;
+  // 自动带出该产品厂家
+  const p = DB.products.find(x=>x.name===name);
+  if(p && p.factory && !o.factory) o.factory = p.factory;
+  suppressOC = {id:oid, key:'product'};
+  save(); hideSug(); renderOrder();
+  flagOrderDup(oid);
+  setTimeout(()=>{ if(suppressOC && suppressOC.id===oid && suppressOC.key==='product') suppressOC=null; }, 90);
+}
+/* 主商家编码模糊搜索（与产品名搜索并列，点选后同步产品信息） */
+function codeSuggest(input, oid){
+  hideSug();
+  const kw = input.value.trim();
+  const kwL = kw.toLowerCase();
+  const list = kw
+    ? DB.products.filter(p=>(p.code||'').toLowerCase().includes(kwL) || (p.name||'').toLowerCase().includes(kwL))
+    : DB.products.filter(p=>p.code && p.code.trim());
+  if(!list.length) return;
+  sugBox = document.createElement('div');
+  sugBox.className = 'sug-box';
+  sugBox.innerHTML = list.slice(0,30).map(p=>`<div class="sug-item" onmousedown="chooseCode('${oid}','${esc(p.code||p.name)}')">${esc(p.code||'(无编码)')}<span class="sug-sub">${esc(p.name||'')}</span></div>`).join('');
+  const r = input.getBoundingClientRect();
+  sugBox.style.position='fixed';
+  sugBox.style.left = r.left+'px';
+  sugBox.style.top = (r.bottom+2)+'px';
+  sugBox.style.width = Math.max(r.width,200)+'px';
+  document.body.appendChild(sugBox);
+}
+function chooseCode(oid, ref){
+  const o = DB.orders.find(x=>x.id===oid); if(!o) return;
+  // ref 可能是主商家编码，也可能是（无编码产品）产品名
+  const p = DB.products.find(x=>x.code===ref) || DB.products.find(x=>x.name===ref);
+  if(!p) return;
+  snapshot();
+  o.code = p.code || '';
+  // 确认选择后同步过来所需产品信息
+  if(p.name) o.product = p.name;
+  if(p.factory) o.factory = p.factory;
+  if(p.size) o.size = p.size;
+  if(p.material) o.material = p.material;
+  suppressOC = {id:oid, key:'code'};
+  save(); hideSug(); renderOrder();
+  setTimeout(()=>{ if(suppressOC && suppressOC.id===oid && suppressOC.key==='code') suppressOC=null; }, 90);
+}
+
+/* ================= 卖价预估计算 ================= */
+const n = id => parseFloat(document.getElementById(id).value);
+const show = (id,v) => document.getElementById(id).textContent = isFinite(v) ? (+v.toFixed(2)).toLocaleString() : '—';
+function calcGold(){ show('g-res', (n('g-weight')*n('g-price')+(n('g-fee')||0))*(n('g-mul')||0)); }
+function calcSilver(){ show('s-res', n('s-cost')*(n('s-x')||0)+(n('s-add')||0)); }
+function calcSG(){
+  const g = (n('sg-gw')*n('sg-gp')+(n('sg-gf')||0))*(n('sg-gmul')||0);
+  const s = n('sg-sc')*(n('sg-sx')||0)+(n('sg-sa')||0);
+  show('sg-gres', g); show('sg-sres', s);
+  show('sg-total', (isFinite(g)?g:NaN)+(isFinite(s)?s:NaN));
+}
+function calcFree(){
+  let exp = document.getElementById('free-exp').value
+    .replace(/×/g,'*').replace(/÷/g,'/').replace(/＋/g,'+').replace(/－/g,'-').replace(/（/g,'(').replace(/）/g,')');
+  if(!exp.trim()){ show('free-res', NaN); return; }
+  if(!/^[\d+\-*/().\s]+$/.test(exp)){ document.getElementById('free-res').textContent='格式错误'; return; }
+  try{ show('free-res', Function('"use strict";return ('+exp+')')()); }
+  catch(e){ document.getElementById('free-res').textContent='…'; }
+}
+
+/* ================= 下载 ================= */
+function renderDownloads(){
+  const box = document.getElementById('dl-history');
+  box.innerHTML = DB.downloads.length
+    ? DB.downloads.slice().reverse().map((d,i)=>`<div class="dl-item"><span>📄 ${esc(d.file)}</span><span>${esc(d.time)}</span></div>`).join('')
+    : '<div class="hint" style="padding:10px 0">暂无下载记录</div>';
+}
+function downloadExcel(){
+  if(!DB.products.length){ toast('还没有录入任何产品，无法导出'); return; }
+  const gv = (p,f) => p[f+'Formula'] ? p[f+'Result'] : (p[f]||'');
+  const gf = (p,f) => p[f+'Formula']||'';
+  const heads = ['主商家编码','厂家','品牌商','产品名称','尺寸','材质',
+    '克重-金','克重-金公式','克重-银','克重-银公式','克重-总和','克重-总和公式',
+    '算法公式模板-金','算法公式模板-银','算法公式模板-总和',
+    '成本价-金','成本价-金公式','成本价-银','成本价-银公式','成本价-总和','成本价-总和公式',
+    '工费',
+    '计算位-金','计算位-金公式','计算位-银','计算位-银公式','计算位-总和','计算位-总和公式',
+    '定价','涨幅','品类','备注','录入日期'];
+  let rows = DB.products.map(p=>{
+    const brandShow = p.brand==='联名款'&&p.coBrand ? '联名款('+p.coBrand+')' : p.brand;
+    return [p.code||'', p.factory, brandShow, p.name, p.size||'', p.material,
+      gv(p,'weightGold'), gf(p,'weightGold'), gv(p,'weightSilver'), gf(p,'weightSilver'), gv(p,'weight'), gf(p,'weight'),
+      p.templateGold||'', p.templateSilver||'', p.template||'',
+      gv(p,'costGold'), gf(p,'costGold'), gv(p,'costSilver'), gf(p,'costSilver'), gv(p,'cost'), gf(p,'cost'),
+      p.fee,
+      gv(p,'calcGold'), gf(p,'calcGold'), gv(p,'calcSilver'), gf(p,'calcSilver'), gv(p,'calc'), gf(p,'calc'),
+      p.price, riseOf(p).text, p.category, p.note, p.createdAt||''];
+  });
+  let html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table border="1">';
+  html += '<tr>'+heads.map(h=>'<th style="background:#efedfe">'+escXml(h)+'</th>').join('')+'</tr>';
+  rows.forEach(r=>{ html += '<tr>'+r.map(c=>'<td>'+escXml(c)+'</td>').join('')+'</tr>'; });
+  html += '</table></body></html>';
+  const now = new Date();
+  const stamp = today()+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+  const fname = '藏物志配饰详情记录单_'+stamp+'.xls';
+  const blob = new Blob(['\ufeff'+html], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = fname; a.click();
+  URL.revokeObjectURL(a.href);
+  DB.downloads.push({ file: fname, time: new Date().toLocaleString('zh-CN') });
+  save(); renderDownloads();
+  toast('已导出 '+DB.products.length+' 条产品数据');
+}
+function downloadOrdersExcel(){
+  if(!DB.orderHistory.length){ toast('还没有已提交的下单记录，请先在"下单"页提交'); return; }
+  const heads = ['提交日期','提交时间','厂家','下单人','产品名称','目前库存','预售单量','下单数量','下单日期'];
+  let rows = [];
+  DB.orderHistory.slice().sort((a,b)=>a.date<b.date?-1:1).forEach(r=>{
+    r.rows.forEach(o=>rows.push([r.date, r.submittedAt, o.factory, o.orderer, o.product, o.stock, o.saleStatus, o.qty, o.date]));
+  });
+  let html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table border="1">';
+  html += '<tr>'+heads.map(h=>'<th style="background:#e8f7ee">'+escXml(h)+'</th>').join('')+'</tr>';
+  rows.forEach(r=>{ html += '<tr>'+r.map(c=>'<td>'+escXml(c)+'</td>').join('')+'</tr>'; });
+  html += '</table></body></html>';
+  const now = new Date();
+  const stamp = today()+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+  const fname = '藏物志下单记录_'+stamp+'.xls';
+  const blob = new Blob(['\ufeff'+html], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = fname; a.click();
+  URL.revokeObjectURL(a.href);
+  DB.downloads.push({ file: fname, time: new Date().toLocaleString('zh-CN') });
+  save(); renderDownloads();
+  toast('已导出 '+rows.length+' 条下单明细');
+}
+function escXml(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ================= 导入商品模板 ================= */
+function impDrop(ev){
+  ev.preventDefault();
+  document.getElementById('imp-drop').classList.remove('over');
+  const f = ev.dataTransfer.files && ev.dataTransfer.files[0];
+  if(f) importFile(f);
+}
+function importFile(file){
+  const name = file.name.toLowerCase();
+  if(!/\.(xlsx|xls|csv)$/.test(name)){ impMsg('❌ 仅支持 .xlsx / .xls / .csv 文件', true); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const wb = XLSX.read(e.target.result, { type:'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header:1, raw:false, defval:'' });
+      processImport(data);
+    }catch(err){ impMsg('❌ 文件解析失败：'+err.message, true); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+function processImport(data){
+  if(!data || !data.length){ impMsg('❌ 文件内容为空', true); return; }
+  // 找表头行：包含"主商家编码"和"产品名称"，并尽量定位厂家、品牌商列
+  let headRow = -1, codeCol = -1, nameCol = -1, factCol = -1, brandCol = -1;
+  for(let i=0;i<Math.min(data.length,5);i++){
+    const r = data[i].map(c=>String(c).replace(/\s/g,''));
+    const ci = r.findIndex(c=>c==='主商家编码'||c.includes('主商家编码')||c.includes('商家编码')||c==='编码');
+    const ni = r.findIndex(c=>c==='产品名称'||c.includes('产品名称')||c.includes('商品名称')||c==='名称');
+    const fi = r.findIndex(c=>c==='厂家'||c.includes('厂家'));
+    const bi = r.findIndex(c=>c==='品牌商'||c.includes('品牌商')||c.includes('品牌'));
+    if(ci>=0 && ni>=0){ headRow=i; codeCol=ci; nameCol=ni; factCol=fi; brandCol=bi; break; }
+  }
+  if(headRow<0){
+    // 兜底：无表头，默认第1列=编码，第2列=名称
+    headRow = -1; codeCol = 0; nameCol = 1; factCol = -1; brandCol = -1;
+  }
+  snapshot();
+  let added=0, updated=0, skipped=0, newFactory=0, newBrand=0;
+  for(let i=headRow+1;i<data.length;i++){
+    const code = String(data[i][codeCol]??'').trim();
+    const pname = String(data[i][nameCol]??'').trim();
+    const factory = factCol>=0 ? String(data[i][factCol]??'').trim() : '';
+    const brand = brandCol>=0 ? String(data[i][brandCol]??'').trim() : '';
+    if(!code){ if(pname) skipped++; continue; }
+    const exist = DB.products.find(p=>(p.code||'').trim()===code);
+    if(exist){
+      if(pname && exist.name!==pname){ exist.name = pname; updated++; }
+      if(factory && exist.factory!==factory){ exist.factory = factory; updated++; }
+      if(brand && exist.brand!==brand){ exist.brand = brand; updated++; }
+    } else {
+      DB.products.push({ id: uid(), code, factory, brand, coBrand:'', name:pname, size:'', material:'',
+        weight:'', weightFormula:'', weightResult:'', weightGold:'', weightGoldFormula:'', weightGoldResult:'',
+        weightSilver:'', weightSilverFormula:'', weightSilverResult:'',
+        template:'', templateGold:'', templateSilver:'',
+        cost:'', costFormula:'', costResult:'', costGold:'', costGoldFormula:'', costGoldResult:'',
+        costSilver:'', costSilverFormula:'', costSilverResult:'',
+        fee:'', calc:'', calcFormula:'', calcResult:'',
+        calcGold:'', calcGoldFormula:'', calcGoldResult:'',
+        calcSilver:'', calcSilverFormula:'', calcSilverResult:'',
+        price:'', category:'', note:'', createdAt: today() });
+      added++;
+    }
+    // 厂家 / 品牌商：导入的新值自动补进下拉选项
+    if(factory && !DB.options.factories.includes(factory)){ DB.options.factories.push(factory); newFactory++; }
+    if(brand && !DB.options.brands.includes(brand)){ DB.options.brands.push(brand); newBrand++; }
+  }
+  save(); renderEntry();
+  let msg = `✅ 导入完成：新增 ${added} 条，更新 ${updated} 条`;
+  if(skipped) msg += `，跳过无编码 ${skipped} 条`;
+  if(newFactory||newBrand) msg += `（自动新增厂家 ${newFactory}、品牌商 ${newBrand} 个下拉项）`;
+  msg += '。其余字段请在表格中手动补填。';
+  impMsg(msg);
+  toast('导入完成：新增 '+added+'，更新 '+updated);
+}
+function impMsg(msg, isErr){
+  const el = document.getElementById('imp-result');
+  el.style.color = isErr ? 'var(--danger)' : 'var(--ok)';
+  el.textContent = msg;
+}
+
+function renderAll(){
+  const active = document.querySelector('.page.active').id;
+  if(active==='page-entry') renderEntry();
+  if(active==='page-order') renderOrder();
+  if(active==='page-download') renderDownloads();
+}
+
+/* ---------- 列宽自由拖拽调节 ---------- */
+const COLW_KEY = { entry:'czz_colw_entry', order:'czz_colw_order_v3' };
+function loadColW(which){ try{ return JSON.parse(localStorage[COLW_KEY[which]]||'{}'); }catch(e){ return {}; } }
+function saveColW(which, obj){ try{ localStorage[COLW_KEY[which]] = JSON.stringify(obj); }catch(e){} }
+function applyTableWidth(tableId, which){
+  const table = document.getElementById(tableId);
+  const ths = table.querySelectorAll('thead th');
+  const store = loadColW(which);
+  let total = 0;
+  ths.forEach((th,i)=>{ const w = store[i]!=null ? store[i] : th.offsetWidth; total += w; });
+  table.style.tableLayout = 'fixed';
+  table.style.width = total + 'px';
+  table.style.minWidth = '0';
+}
+function initColResize(tableId, which){
+  const table = document.getElementById(tableId);
+  if(!table) return;
+  if(table.offsetWidth === 0) return; // 页面不可见时跳过，待显示后再初始化
+  if(table.dataset.colInit) return;
+  table.dataset.colInit = '1';
+  const store = loadColW(which);
+  const ths = table.querySelectorAll('thead th');
+  ths.forEach((th,i)=>{
+    if(store[i]!=null) th.style.width = store[i] + 'px';
+    if(th.querySelector('.rs')) return;
+    const rs = document.createElement('span');
+    rs.className = 'rs';
+    rs.onmousedown = e => startResize(e, tableId, which, i);
+    th.appendChild(rs);
+  });
+  applyTableWidth(tableId, which);
+}
+function startResize(e, tableId, which, i){
+  e.preventDefault(); e.stopPropagation();
+  const table = document.getElementById(tableId);
+  const th = table.querySelectorAll('thead th')[i];
+  const startX = e.clientX;
+  const startW = th.offsetWidth;
+  const store = loadColW(which);
+  document.body.classList.add('rs-drag');
+  function move(ev){
+    let w = Math.max(40, startW + (ev.clientX - startX));
+    store[i] = w; th.style.width = w + 'px';
+    applyTableWidth(tableId, which);
+  }
+  function up(){
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    document.body.classList.remove('rs-drag');
+    saveColW(which, store);
+  }
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+/* 初始化 */
+renderEntry(); renderOrder(); renderDownloads();
+go('home');
+</script>
+</body>
+</html>
