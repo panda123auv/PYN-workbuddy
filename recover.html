@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>藏物志 · 数据恢复工具</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#ffffff,#eef1f8);color:#1d2433;min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{width:100%;max-width:560px;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);
+    border:1px solid rgba(124,108,255,.18);border-radius:18px;padding:28px 26px;
+    box-shadow:0 18px 50px rgba(40,40,90,.12)}
+  h1{font-size:20px;margin:0 0 6px}
+  .sub{color:#6b7488;font-size:13px;margin:0 0 18px;line-height:1.6}
+  .box{border:1px dashed #c7cbe6;border-radius:12px;padding:16px;background:#fafbff;margin:14px 0}
+  .count{font-size:15px;margin:4px 0}
+  .count b{color:#4f46e5;font-size:18px}
+  .empty{color:#b45309}
+  .found{color:#15803d}
+  button{font-size:14px;border:none;border-radius:10px;padding:11px 16px;cursor:pointer;font-weight:600}
+  .primary{background:#4f46e5;color:#fff}
+  .ghost{background:#eef0fb;color:#4f46e5}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .tip{font-size:12.5px;color:#6b7488;line-height:1.7;background:#f5f6fc;border-radius:10px;padding:12px 14px;margin-top:16px}
+  .tip b{color:#1d2433}
+  code{background:#eceefb;padding:1px 6px;border-radius:5px;font-size:12px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🛠️ 数据恢复工具</h1>
+    <p class="sub">这个工具专门用来在被登录门禁挡住时，把你浏览器里原本存着的数据取出来。它<b>不会</b>要求你登录，也不会上传任何东西，只是把数据读出来给你下载。</p>
+
+    <div class="box">
+      <div id="status" class="count">正在读取本浏览器存储…</div>
+      <div id="detail"></div>
+      <div class="row">
+        <button class="primary" id="dl" onclick="doDownload()" disabled>⬇️ 下载备份(JSON)</button>
+        <button class="ghost" onclick="location.reload()">🔄 重新读取</button>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>怎么用这个工具：</b><br>
+      1. 用<b>当初录入产品时同一个浏览器</b>打开本文件（本地双击 <code>recover.html</code>，或线上版本的 <code>/recover.html</code>）。<br>
+      2. 如果上面显示找到了产品 → 点「下载备份」，得到一个 <code>.json</code> 文件。<br>
+      3. 打开线上工作台 <code>https://panda123auv.github.io/PYN-workbuddy/</code>，用<b>邮箱</b>登录，进入「下载」页面，点「⬆️ 上传恢复」选这个 json。<br>
+      4. 数据会自动重新加密并同步到你的云端账号，之后换设备登录就能拉回来。<br><br>
+      <b>如果这里显示 0 条 / 未找到：</b>说明数据不在这个"打开方式"的存储里。请换一个打开方式再试——<br>
+      · 现在是在<b>线上网址</b>打开的 → 改用<b>本地文件</b>双击打开本工具；<br>
+      · 现在是在<b>本地文件</b>打开的 → 改用<b>线上网址</b>的 <code>/recover.html</code> 打开。
+    </div>
+  </div>
+
+<script>
+(function(){
+  const KEY='czz_data_v1';
+  const status=document.getElementById('status');
+  const detail=document.getElementById('detail');
+  const dl=document.getElementById('dl');
+  function count(arr){ return Array.isArray(arr)?arr.length:0; }
+  let raw=null;
+  try{ raw=localStorage.getItem(KEY); }catch(e){}
+  if(!raw){
+    status.innerHTML='<span class="empty">⚠️ 本浏览器/本打开方式下未找到任何数据</span>';
+    detail.innerHTML='<div class="count">说明这份存储目前是空的。请按下方提示换一种打开方式再试。</div>';
+    return;
+  }
+  let d;
+  try{ d=JSON.parse(raw); }catch(e){
+    status.innerHTML='<span class="empty">⚠️ 找到了数据但已损坏，无法解析</span>';
+    return;
+  }
+  const p=count(d.products), o=count(d.orders), dl2=count(d.downloads), oh=count(d.orderHistory);
+  if(p===0 && o===0 && dl2===0 && oh===0){
+    status.innerHTML='<span class="empty">找到了数据，但里面没有任何产品/下单记录（是空的）</span>';
+    detail.innerHTML='<div class="count">这条存储里账号信息有，但业务数据是空的。说明真正的数据在另一种打开方式里，请换一个再试。</div>';
+    return;
+  }
+  status.innerHTML='<span class="found">✅ 找到了你的数据！</span>';
+  detail.innerHTML=
+    '<div class="count">产品录入：<b>'+p+'</b> 条</div>'+
+    '<div class="count">下单记录：<b>'+o+'</b> 条</div>'+
+    '<div class="count">历史/其他：<b>'+(oh+dl2)+'</b> 条</div>';
+  dl.disabled=false;
+  window.__raw=raw;
+})();
+
+function doDownload(){
+  if(!window.__raw){ return; }
+  const blob=new Blob([window.__raw],{type:'application/json'});
+  const a=document.createElement('a');
+  const ts=new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);
+  a.href=URL.createObjectURL(blob);
+  a.download='藏物志备份_'+ts+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>
