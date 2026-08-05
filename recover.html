@@ -36,6 +36,7 @@
 
     <div class="box">
       <div id="status" class="count">正在读取本浏览器存储…</div>
+      <div id="loc" class="count" style="font-size:12px;color:#9aa0b5;margin-top:6px"></div>
       <div id="detail"></div>
       <div class="row">
         <button class="primary" id="dl" onclick="doDownload()" disabled>⬇️ 下载备份(JSON)</button>
@@ -57,6 +58,7 @@
 
 <script>
 (function(){
+  document.getElementById('loc').textContent='当前页面：'+location.href;
   const KEY='czz_data_v1';
   const status=document.getElementById('status');
   const detail=document.getElementById('detail');
