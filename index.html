@@ -302,6 +302,13 @@
   .auth-switch{text-align:center;font-size:12px;color:var(--sub);margin-top:12px;cursor:pointer}
   .auth-switch span{color:var(--accent2);cursor:pointer}
 
+  /* ---------- 云端配置 ---------- */
+  .cloud-cfg{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .cloud-cfg-toggle{cursor:pointer;font-size:13px;color:var(--accent);font-weight:600;text-align:center}
+  .cloud-cfg-toggle #cloud-status{font-weight:400;color:var(--sub);margin-left:6px}
+  .cloud-cfg-body{margin-top:12px;text-align:left;display:flex;flex-direction:column;gap:10px}
+  .cloud-cfg-body .btn{margin-top:2px}
+
   /* ---------- 只读提示 ---------- */
   .ro-banner{background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.30);color:#b45309;border-radius:8px;padding:7px 12px;font-size:12px;margin-bottom:12px}
 
@@ -350,6 +357,30 @@
     <div class="auth-err" id="auth-err"></div>
     <button class="btn btn-primary" onclick="authSubmit()">登录</button>
     <div class="auth-switch" id="auth-switch">还没有账号？<span onclick="setAuthMode('register')">立即注册</span></div>
+    <div class="cloud-cfg">
+      <div class="cloud-cfg-toggle" onclick="toggleCloudCfg()">⚙️ 云端同步设置 <span id="cloud-status">未配置</span></div>
+      <div class="cloud-cfg-body" id="cloud-cfg-body" style="display:none">
+        <div class="auth-field"><label>Supabase 项目 URL</label><input id="cloud-url" placeholder="https://xxxx.supabase.co"></div>
+        <div class="auth-field"><label>Publishable key</label><input id="cloud-key" type="password" placeholder="sb_publishable_..."></div>
+        <button class="btn btn-ghost" onclick="saveCloudCfg()">保存云端配置</button>
+        <div class="hint">在 Supabase 后台 API Keys 页面，复制 Project URL 与 Publishable key 粘贴到此（用复制按钮，别手打）。数据会用你的「数据密码」加密后再上传，平台看不到明文。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 数据密码解锁 ============ -->
+<div class="auth-mask" id="dp-mask">
+  <div class="auth-card">
+    <div class="logo">🔐</div>
+    <h2>输入数据密码</h2>
+    <div class="sub">此密码用于解密你云端的数据，<b>不会上传到任何服务器</b>。请牢记，忘记将无法恢复。</div>
+    <div class="auth-field">
+      <label>数据密码（至少 6 位）</label>
+      <input id="dp-pass" type="password" placeholder="输入你的数据密码" onkeydown="if(event.key==='Enter')submitDataPass()">
+    </div>
+    <div class="auth-err" id="dp-err"></div>
+    <button class="btn btn-primary" onclick="submitDataPass()">解锁云端数据</button>
   </div>
 </div>
 
@@ -357,7 +388,7 @@
   <div class="home-logo">藏</div>
   <div class="home-title">大佬潘专属工作台</div>
   <div class="home-subtitle">藏物志配饰成本、卖价核算、统计、下单一站式管理平台</div>
-  <div class="home-sub">本地存储 · 数据保存在本机浏览器中 · 支持导出 Excel</div>
+  <div class="home-sub">数据经你的数据密码加密后同步至云端 · 换设备/换浏览器登录即可拉回 · 支持导出 Excel</div>
   <div class="home-grid">
     <div class="home-card" onclick="go('entry')"><div class="ic">📝</div><div class="t">录入</div><div class="d">录入产品成本 / 定价 / 涨幅明细</div></div>
     <div class="home-card" onclick="go('order')"><div class="ic">📦</div><div class="t">下单</div><div class="d">向厂家一次性批量下单登记</div></div>
@@ -779,6 +810,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ================= 数据层 ================= */
 const LS_KEY = 'czz_data_v1';
@@ -812,7 +844,7 @@ function load(){
            accounts: [], session: null,
            options: JSON.parse(JSON.stringify(DEFAULTS)) };
 }
-function save(){ localStorage.setItem(LS_KEY, JSON.stringify(DB)); }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(DB)); scheduleSync(); }
 
 /* ================= 账号 / 登录 / 权限 ================= */
 /* 说明：当前账号与数据均存于本机浏览器。真正的"换设备登录拉回数据"需云端同步（后续任务）。
@@ -862,36 +894,153 @@ function setLoginType(t){
   document.getElementById('auth-login-label').textContent = t==='email'?'邮箱':'手机号';
   document.getElementById('auth-login').placeholder = t==='email'?'输入邮箱':'输入 11 位手机号';
 }
+/* ================= 云端同步（Supabase + 客户端加密） ================= */
+const LS_CLOUD = 'czz_cloud_cfg';
+let CLOUD = (()=>{ try{ return JSON.parse(localStorage.getItem(LS_CLOUD))||null; }catch(e){ return null; } })();
+let SB = null;                 // Supabase 客户端
+let CLOUD_USER = null;         // 当前登录的 Supabase 用户
+let DATA_KEY = null;           // 数据密码（仅存内存，不上传）
+let lastLogin = { login:'', type:'email' };
+let syncTimer = null;
+
+function initSupabase(){
+  if(CLOUD && CLOUD.url && CLOUD.anonKey && window.supabase){
+    try{ SB = window.supabase.createClient(CLOUD.url, CLOUD.anonKey); return true; }catch(e){ return false; }
+  }
+  return false;
+}
+function refreshCloudStatus(){
+  const st = document.getElementById('cloud-status');
+  const u = document.getElementById('cloud-url'); const k = document.getElementById('cloud-key');
+  if(CLOUD && CLOUD.url){ if(st) st.textContent='已配置'; if(u) u.value=CLOUD.url; if(k) k.value=CLOUD.anonKey||''; }
+  else if(st) st.textContent='未配置';
+}
+function toggleCloudCfg(){ const b=document.getElementById('cloud-cfg-body'); b.style.display = b.style.display==='none'?'block':'none'; }
+function saveCloudCfg(){
+  const url=document.getElementById('cloud-url').value.trim();
+  const key=document.getElementById('cloud-key').value.trim();
+  if(!url||!key){ toast('请填写 URL 和 key'); return; }
+  CLOUD={url,anonKey:key}; localStorage.setItem(LS_CLOUD, JSON.stringify(CLOUD));
+  const ok=initSupabase();
+  if(ok){ refreshCloudStatus(); toast('云端配置已保存，可登录'); }
+  else toast('配置无效，请检查 URL 与 Publishable key');
+}
+
+/* ---- 客户端加密（Web Crypto：PBKDF2 派生 AES-GCM 256）---- */
+function b64(bytes){ let bin=''; const chunk=0x8000; for(let i=0;i<bytes.length;i+=chunk){ bin+=String.fromCharCode.apply(null, bytes.subarray(i,i+chunk)); } return btoa(bin); }
+function unb64(s){ const bin=atob(s); const u8=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i]=bin.charCodeAt(i); return u8; }
+const ENC = {
+  async deriveKey(pass, salt){
+    const enc = new TextEncoder();
+    const mat = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:100000, hash:'SHA-256'},
+      mat, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+  },
+  async encrypt(obj, pass){
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await this.deriveKey(pass, salt);
+    const data = new TextEncoder().encode(JSON.stringify(obj));
+    const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, data);
+    return JSON.stringify({ v:1, salt:b64(salt), iv:b64(iv), ct:b64(new Uint8Array(ct)) });
+  },
+  async decrypt(text, pass){
+    const o = JSON.parse(text);
+    const key = await this.deriveKey(pass, unb64(o.salt));
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:unb64(o.iv)}, key, unb64(o.ct));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+};
+function cryptoReady(){ return !!(window.crypto && window.crypto.subtle); }
+
+/* ---- 把内存 DB 中可同步的部分抽出来（不含 session）---- */
+function syncableDB(){
+  const out = {};
+  ['products','orders','downloads','orderHistory','orderDrafts','orderMeta','options','accounts'].forEach(k=> out[k]=DB[k]);
+  return out;
+}
+function loadCloudIntoDB(obj){
+  DB = Object.assign({ products:[],orders:[],downloads:[],orderHistory:[],orderDrafts:[],orderMeta:{locked:false,recordId:null},accounts:[],session:null,options:JSON.parse(JSON.stringify(DEFAULTS)) }, obj||{});
+  DB.options = Object.assign({}, JSON.parse(JSON.stringify(DEFAULTS)), obj.options||{});
+  DEFAULTS && Object.keys(DEFAULTS).forEach(k=>{ DEFAULTS[k].forEach(v=>{ if(!DB.options[k].includes(v)) DB.options[k].push(v); }); });
+  DB.products=DB.products||[]; DB.orders=DB.orders||[]; DB.downloads=DB.downloads||[];
+  DB.orderHistory=DB.orderHistory||[]; DB.orderDrafts=DB.orderDrafts||[];
+  DB.orderMeta=DB.orderMeta||{locked:false,recordId:null}; DB.accounts=DB.accounts||[]; DB.session=DB.session||null;
+}
+function scheduleSync(){
+  if(!SB || !CLOUD_USER || !DATA_KEY) return;
+  clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 800);
+}
+async function syncNow(){
+  if(!SB || !CLOUD_USER || !DATA_KEY) return;
+  try{
+    const cipher = await ENC.encrypt(syncableDB(), DATA_KEY);
+    const { error } = await SB.from('user_data').upsert({ user_id: CLOUD_USER.id, cipher_json: cipher, updated_at: new Date().toISOString() });
+    if(error) throw error;
+    console.log('[cloud] synced');
+  }catch(e){ console.warn('[cloud] sync failed', e); toast('云端同步失败（本地已保存）：'+(e.message||'')); }
+}
+async function afterCloudAuth(user){
+  CLOUD_USER = user;
+  document.getElementById('dp-err').textContent='';
+  document.getElementById('dp-pass').value='';
+  document.getElementById('dp-mask').classList.add('show');
+  try{ document.getElementById('dp-pass').focus(); }catch(e){}
+}
+async function submitDataPass(){
+  const err=document.getElementById('dp-err'); err.textContent='';
+  if(!cryptoReady()){ err.textContent='当前打开方式不支持加密，请用 https 网址或本地服务器打开'; return; }
+  const pw=document.getElementById('dp-pass').value;
+  if(!pw||pw.length<6){ err.textContent='数据密码至少 6 位'; return; }
+  try{
+    const { data, error } = await SB.from('user_data').select('cipher_json').eq('user_id', CLOUD_USER.id).maybeSingle();
+    if(error) throw error;
+    if(data && data.cipher_json){ loadCloudIntoDB(await ENC.decrypt(data.cipher_json, pw)); }
+    else { toast('云端暂无数据，已为你创建新的云端空间'); }
+    const loginVal = lastLogin.login;
+    const name = (CLOUD_USER.user_metadata && CLOUD_USER.user_metadata.name) || loginVal;
+    let rec = DB.accounts.find(a=>a.id===CLOUD_USER.id);
+    if(!rec){ rec={id:CLOUD_USER.id, login:loginVal, type:lastLogin.type, role:'main', permission:'edit', info:{name}, createdAt: today()}; DB.accounts.push(rec); }
+    else { rec.login=loginVal; rec.type=lastLogin.type; rec.role='main'; rec.permission='edit'; rec.info=Object.assign({}, rec.info, {name}); }
+    DB.session={ uid: CLOUD_USER.id };
+    DATA_KEY=pw; save();
+    document.getElementById('dp-mask').classList.remove('show');
+    showApp();
+  }catch(e){ err.textContent='数据密码错误，或数据已损坏'; }
+}
+
 function authSubmit(){
   const err = document.getElementById('auth-err');
   err.textContent='';
+  if(!SB){ err.textContent='请先在下方「云端同步设置」里粘贴 Supabase 的 URL 与 Publishable key'; return; }
   const login = document.getElementById('auth-login').value.trim();
   const pass = document.getElementById('auth-pass').value;
   if(!validLogin(loginType, login)){ err.textContent = loginType==='email'?'邮箱格式不正确':'请输入 11 位手机号'; return; }
   if(!pass || pass.length<6){ err.textContent='密码至少 6 位'; return; }
-  if(authMode==='register'){
-    if(DB.accounts.some(a=>a.login===login && a.type===loginType)){ err.textContent='该账号已注册，请直接登录'; return; }
-    const acc = { id: uid(), login, type:loginType, passHash:hashPwd(pass),
-      role: DB.accounts.length===0?'main':'sub',
-      permission: DB.accounts.length===0?'edit':'view',
-      info:{ name: document.getElementById('auth-name').value.trim(), regAt: today()+' '+new Date().toTimeString().slice(0,5) },
-      createdAt: today() };
-    DB.accounts.push(acc);
-    DB.session = { uid: acc.id };
-    save();
-    showApp();
-    toast(acc.role==='main'?'注册成功，你已是主账号':'注册成功，已以普通账号登录');
-  } else {
-    const acc = DB.accounts.find(a=>a.login===login && a.type===loginType);
-    if(!acc){ err.textContent='账号不存在，请先注册'; return; }
-    if(acc.passHash!==hashPwd(pass)){ err.textContent='密码错误'; return; }
-    DB.session = { uid: acc.id };
-    save();
-    showApp();
-    toast('登录成功'+(isMain()?'（主账号）':''));
-  }
+  lastLogin = { login, type: loginType };
+  const cred = loginType==='email' ? { email:login, password:pass } : { phone:login, password:pass };
+  (async()=>{
+    try{
+      let res;
+      if(authMode==='register'){
+        const meta = { name: document.getElementById('auth-name').value.trim() };
+        res = await SB.auth.signUp({ ...cred, options:{ data: meta } });
+        if(res.error) throw res.error;
+        if(res.data.user && !res.data.session){
+          err.textContent='注册成功，请先到邮箱/手机完成验证后再登录（或在 Supabase 后台关闭邮箱验证）'; return;
+        }
+        toast('注册成功，请输入数据密码解锁云端');
+      } else {
+        res = await SB.auth.signInWithPassword(cred);
+        if(res.error) throw res.error;
+      }
+      await afterCloudAuth(res.data.user);
+    }catch(e){ err.textContent = (e && e.message) ? e.message : '登录失败'; }
+  })();
 }
-function doLogout(){
+async function doLogout(){
+  try{ if(SB) await SB.auth.signOut(); }catch(e){}
+  DATA_KEY=null; CLOUD_USER=null; lastLogin={login:'',type:'email'};
   DB.session=null; save(); showAuth();
 }
 function showAuth(){
@@ -2445,8 +2594,25 @@ function startResize(e, tableId, which, i){
 }
 
 /* 初始化 */
-renderEntry(); renderOrder(); renderDownloads();
-if(DB.session && currentUser()){ showApp(); } else { showAuth(); }
+(async function(){
+  if(initSupabase()){ refreshCloudStatus(); }
+  let sess = null;
+  if(SB){ const r = await SB.auth.getSession().catch(()=>({data:{}})); sess = r && r.data ? r.data.session : null; }
+  if(SB && sess){
+    const ud = await SB.auth.getUser().catch(()=>({data:{}}));
+    if(ud && ud.data && ud.data.user){
+      CLOUD_USER = ud.data.user;
+      document.body.classList.add('auth-mode');
+      document.getElementById('dp-err').textContent='';
+      document.getElementById('dp-pass').value='';
+      document.getElementById('dp-mask').classList.add('show');
+      renderEntry(); renderOrder(); renderDownloads();
+      return;
+    }
+  }
+  renderEntry(); renderOrder(); renderDownloads();
+  showAuth();
+})();
 window.addEventListener('resize', updateEntrySticky);
 </script>
 </body>
