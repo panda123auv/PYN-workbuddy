@@ -5,209 +5,241 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>大佬潘专属工作台</title>
 <style>
-  :root{
-    --bg:#f6f7fb; --card:#ffffff; --ink:#1f2430; --sub:#6b7280;
-    --accent:#6d5df6; --accent2:#8b7cf8; --accent-soft:#efedfe;
-    --line:#e6e8f0; --danger:#e5484d; --ok:#18a058;
-    --shadow:0 2px 10px rgba(30,34,60,.06),0 8px 30px rgba(30,34,60,.06);
-    --radius:14px;
+:root{
+    --bg1:#0a0e1a; --bg2:#0e1330;
+    --glass:rgba(255,255,255,0.06);
+    --glass-strong:rgba(255,255,255,0.10);
+    --glass-border:rgba(255,255,255,0.14);
+    --glass-border-soft:rgba(255,255,255,0.09);
+    --ink:#eef1f8; --sub:#9aa3b8;
+    --accent:#8b7cf8; --accent2:#a78bfa; --accent-soft:rgba(139,124,248,0.18);
+    --line:rgba(255,255,255,0.09);
+    --danger:#ff6b6b; --ok:#34d399;
+    --shadow:0 10px 40px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.15);
+    --radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
-  body{background:var(--bg);color:var(--ink);min-height:100vh}
-  .page{display:none;max-width:1280px;margin:0 auto;padding:28px 24px 60px}
+  html,body{height:100%}
+  body{
+    color:var(--ink);min-height:100vh;position:relative;overflow-x:hidden;
+    background:
+      radial-gradient(1200px 800px at 12% -10%, rgba(109,93,246,.30), transparent 55%),
+      radial-gradient(1000px 700px at 110% 10%, rgba(34,211,238,.18), transparent 55%),
+      radial-gradient(900px 700px at 50% 120%, rgba(168,85,247,.22), transparent 55%),
+      linear-gradient(160deg,var(--bg1),var(--bg2));
+    background-attachment:fixed;
+  }
+  /* 漂浮光斑：加强玻璃折射与光影流动感 */
+  body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(120px);z-index:-1;pointer-events:none}
+  body::before{width:480px;height:480px;top:-140px;left:-100px;background:radial-gradient(circle,rgba(124,108,255,.45),transparent 70%)}
+  body::after{width:520px;height:520px;bottom:-180px;right:-120px;background:radial-gradient(circle,rgba(34,211,238,.28),transparent 70%)}
+  .page{display:none;max-width:1280px;margin:0 auto;padding:28px 24px 60px;position:relative;z-index:1}
   .page.active{display:block}
 
   /* ---------- 首页 ---------- */
   #page-home{max-width:860px;text-align:center;padding-top:9vh}
   .home-logo{width:64px;height:64px;border-radius:18px;margin:0 auto 22px;
     background:linear-gradient(135deg,var(--accent),#a78bfa);display:flex;align-items:center;justify-content:center;
-    color:#fff;font-size:30px;box-shadow:0 10px 26px rgba(109,93,246,.35)}
-  .home-title{font-size:34px;font-weight:700;letter-spacing:2px}
-  .home-subtitle{color:var(--accent);margin:8px 0 4px;font-size:16px;font-weight:600;letter-spacing:1px}
+    color:#fff;font-size:30px;box-shadow:0 10px 30px rgba(124,108,255,.45), inset 0 1px 2px rgba(255,255,255,.5)}
+  .home-title{font-size:34px;font-weight:700;letter-spacing:2px;text-shadow:0 2px 20px rgba(124,108,255,.4)}
+  .home-subtitle{color:var(--accent2);margin:8px 0 4px;font-size:16px;font-weight:600;letter-spacing:1px}
   .home-sub{color:var(--sub);margin:6px 0 42px;font-size:14px}
   .home-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-  .home-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:30px 20px;cursor:pointer;box-shadow:var(--shadow);transition:.18s;text-align:center}
-  .home-card:hover{transform:translateY(-3px);border-color:var(--accent2);box-shadow:0 12px 32px rgba(109,93,246,.18)}
+  .home-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);
+    padding:30px 20px;cursor:pointer;box-shadow:var(--shadow);transition:.18s;text-align:center;
+    backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%)}
+  .home-card:hover{transform:translateY(-3px);border-color:var(--accent2);
+    box-shadow:0 16px 44px rgba(124,108,255,.30), inset 0 1px 1px rgba(255,255,255,.22)}
   .home-card .ic{font-size:30px;margin-bottom:10px}
   .home-card .t{font-size:18px;font-weight:600}
   .home-card .d{font-size:13px;color:var(--sub);margin-top:6px}
 
   /* ---------- 通用头部 ---------- */
   .topbar{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
-  .back-btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 16px;
-    cursor:pointer;font-size:14px;color:var(--ink);transition:.15s}
-  .back-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .back-btn{border:1px solid var(--glass-border);background:var(--glass);border-radius:10px;padding:8px 16px;
+    cursor:pointer;font-size:14px;color:var(--ink);transition:.15s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .back-btn:hover{border-color:var(--accent);color:var(--accent2)}
   .page-title{font-size:22px;font-weight:700}
   .spacer{flex:1}
   .btn{border:none;border-radius:10px;padding:9px 18px;font-size:14px;cursor:pointer;transition:.15s;font-weight:500}
-  .btn-primary{background:var(--accent);color:#fff}
-  .btn-primary:hover{background:#5a49f0}
-  .btn-ghost{background:var(--accent-soft);color:var(--accent)}
-  .btn-ghost:hover{background:#e2defc}
-  .btn-danger{background:#fdebec;color:var(--danger)}
-  .btn-danger:hover{background:#fad4d6}
-  .mini-btn{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:7px;padding:2px 9px;font-size:11px;cursor:pointer;transition:.12s}
-  .mini-btn:hover{background:#fdebec;color:var(--danger);border-color:#f3b6ba}
-  .void-badge{background:#fdebec;color:var(--danger);border:1px solid #f3b6ba;border-radius:7px;padding:2px 9px;font-size:12px;font-weight:600}
+  .btn-primary{background:linear-gradient(135deg,#7c6cff,#a78bfa);color:#fff;
+    box-shadow:0 8px 22px rgba(124,108,255,.40), inset 0 1px 1px rgba(255,255,255,.4)}
+  .btn-primary:hover{background:linear-gradient(135deg,#8a7bff,#b794fb);transform:translateY(-1px)}
+  .btn-ghost{background:var(--glass-strong);color:var(--accent2);border:1px solid var(--glass-border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .btn-ghost:hover{background:rgba(139,124,248,.28)}
+  .btn-danger{background:rgba(255,107,107,.16);color:var(--danger);border:1px solid rgba(255,107,107,.35)}
+  .btn-danger:hover{background:rgba(255,107,107,.28)}
+  .mini-btn{border:1px solid var(--glass-border);background:var(--glass);color:var(--sub);border-radius:7px;padding:2px 9px;font-size:11px;cursor:pointer;transition:.12s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .mini-btn:hover{background:rgba(255,107,107,.18);color:var(--danger);border-color:rgba(255,107,107,.5)}
+  .void-badge{background:rgba(255,107,107,.18);color:var(--danger);border:1px solid rgba(255,107,107,.4);border-radius:7px;padding:2px 9px;font-size:12px;font-weight:600}
   .void-reason{color:var(--danger);font-size:11px;margin-top:3px;line-height:1.4}
-  .void-reason-box{background:#fdf3f4;border:1px solid #f3d2d5;border-radius:8px;padding:8px 12px;margin-bottom:10px;color:var(--danger);font-size:12px;line-height:1.5}
-  tr.void-row td{opacity:.6;background:#fbf3f4}
+  .void-reason-box{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);border-radius:8px;padding:8px 12px;margin-bottom:10px;color:var(--danger);font-size:12px;line-height:1.5}
+  tr.void-row td{opacity:.55;background:rgba(255,107,107,.08)}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:18px;backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%)}
 
   /* ---------- 筛选条 ---------- */
   .filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
   .filters label{font-size:13px;color:var(--sub)}
-  .filters select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;min-width:110px}
+  .filters select{padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px;min-width:110px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   .hint{font-size:12px;color:var(--sub)}
 
   /* ---------- 表格 ---------- */
-  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--glass-border);border-radius:12px;
+    background:rgba(255,255,255,0.035);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    box-shadow:var(--shadow)}
   table{border-collapse:collapse;width:100%;min-width:1500px}
-  th{background:#f3f2fd;color:#4c4370;font-size:13px;font-weight:600;padding:10px 8px;
-    border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap;position:sticky;top:0}
-  td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:0;vertical-align:middle;background:#fff}
+  th{background:rgba(255,255,255,0.07);color:#cdd3e6;font-size:13px;font-weight:600;padding:10px 8px;
+    border-bottom:1px solid var(--glass-border-soft);border-right:1px solid var(--glass-border-soft);white-space:nowrap;position:sticky;top:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  td{border-bottom:1px solid var(--glass-border-soft);border-right:1px solid var(--glass-border-soft);
+    padding:0;vertical-align:middle;background:rgba(255,255,255,0.02)}
   td:last-child,th:last-child{border-right:none}
   tr:last-child td{border-bottom:none}
-  td input,td select{width:100%;border:none;outline:none;padding:9px 8px;font-size:13px;background:transparent;min-width:80px}
-  td select{cursor:pointer}
-  td input:focus,td select:focus{background:var(--accent-soft)}
-  td.formula-cell input{color:#0b6bcb;font-weight:500}
-  th.price-col, td.price-col input{color:#d2202a}
-  td.price-col input{font-weight:600;font-size:16px}
-  th.qty-col, td.qty-col input, th.qty-col-disp, td.qty-col-disp{color:#d2202a}
-  td.qty-col input{font-weight:600;font-size:19px}
-  td.qty-col-disp{font-weight:600;font-size:19px}
+  td input,td select{width:100%;border:none;outline:none;padding:9px 8px;font-size:13px;
+    background:transparent;color:var(--ink);min-width:80px}
+  td select{cursor:pointer;color:var(--ink)}
+  td input:focus,td select:focus{background:rgba(139,124,248,0.16)}
+  td.formula-cell input{color:#5aa9ff;font-weight:500}
+  th.price-col, td.price-col input{color:#ff4d4f}
+  td.price-col input{font-weight:600;font-size:22px}
+  td.price-col{font-weight:600;font-size:22px}
+  th.qty-col, td.qty-col input, th.qty-col-disp, td.qty-col-disp{color:#ff4d4f}
+  td.price-col input::placeholder{color:#ff8a8a;opacity:.85}
+  td.qty-col input::placeholder{color:#ff8a8a;opacity:.85}
+  td.qty-col input{font-weight:600;font-size:24px}
+  td.qty-col-disp{font-weight:600;font-size:24px}
   th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
-  th.sortable:hover{color:var(--accent)}
+  th.sortable:hover{color:var(--accent2)}
   th.sortable .sort-ind{font-size:10px;margin-left:3px;color:var(--sub);opacity:.45}
-  th.sort-asc,th.sort-desc{color:var(--accent)}
-  th.sort-asc .sort-ind,th.sort-desc .sort-ind{opacity:1;color:var(--accent)}
-  th.price-col.sort-asc,th.price-col.sort-desc{color:#d2202a}
-  th.qty-col.sort-asc,th.qty-col.sort-desc{color:#d2202a}
+  th.sort-asc,th.sort-desc{color:var(--accent2)}
+  th.sort-asc .sort-ind,th.sort-desc .sort-ind{opacity:1;color:var(--accent2)}
+  th.price-col.sort-asc,th.price-col.sort-desc{color:var(--danger)}
+  th.qty-col.sort-asc,th.qty-col.sort-desc{color:#ff8a8a}
   /* 单元格居中（下单页指定列） */
   .col-center{text-align:center}
   .col-center input,.col-center select{text-align:center}
   /* 草稿箱 */
-  .draft-card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;background:#fff}
+  .draft-card{border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;
+    display:flex;flex-direction:column;gap:6px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   .draft-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px}
-  .draft-detail{font-size:13px;color:var(--text)}
+  .draft-detail{font-size:13px;color:var(--sub)}
   .draft-ops{display:flex;gap:8px;justify-content:flex-end;margin-top:2px}
   td.calcgrid-cell{padding:2px 3px}
   table.calc-mini{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;overflow:hidden}
-  table.calc-mini td{padding:1px 2px;border:none;vertical-align:middle}
+  table.calc-mini td{padding:1px 2px;border:none;vertical-align:middle;background:transparent}
   table.calc-mini .cl{width:30px;text-align:right;color:var(--sub);font-size:11px;font-weight:600;padding-right:5px;white-space:nowrap}
-  table.calc-mini .cv input{width:100%;min-width:0;padding:3px 5px;border:1px solid var(--line);border-radius:5px;font-size:12px;box-sizing:border-box}
+  table.calc-mini .cv input{width:100%;min-width:0;padding:3px 5px;border:1px solid var(--glass-border);border-radius:5px;font-size:12px;box-sizing:border-box;color:var(--ink);background:rgba(255,255,255,0.04)}
   table.calc-mini tr + tr td{padding-top:2px}
-  td .dup-warn{background:#fff1f1 !important}
+  td .dup-warn{background:rgba(255,107,107,.18) !important}
   /* 下单页产品名重复：弹窗期间重复位置闪烁标红 */
-  @keyframes dupFlash{ 0%,100%{background-color:#ffe0e0} 50%{background-color:#ff8a8a} }
+  @keyframes dupFlash{ 0%,100%{background-color:rgba(255,107,107,.25)} 50%{background-color:rgba(255,107,107,.55)} }
   td.prod-cell.dup-flash, td.prod-cell.dup-flash input{ animation:dupFlash .7s ease-in-out infinite; border-radius:6px }
   /* 输入过程中实时标红的重复提示 */
-  td.prod-cell.dup-live input{ border-color:var(--danger);box-shadow:0 0 0 2px rgba(210,32,42,.18) }
+  td.prod-cell.dup-live input{ border-color:var(--danger);box-shadow:0 0 0 2px rgba(255,107,107,.25) }
   td.prod-cell.dup-live::after{ content:'⚠ 重复'; position:absolute; right:4px; top:-9px; z-index:5;
     background:var(--danger); color:#fff; font-size:10px; line-height:1; padding:2px 5px; border-radius:6px; white-space:nowrap }
   .del-cell{width:44px;text-align:center}
-  .del-row{color:#c3c6d4;cursor:pointer;font-size:15px;padding:6px;background:none;border:none}
+  .del-row{color:#7e859b;cursor:pointer;font-size:15px;padding:6px;background:none;border:none}
   .del-row:hover{color:var(--danger)}
   .rise-cell{padding:9px 8px;font-size:13px;color:var(--ok);font-weight:600;white-space:nowrap}
   .rise-cell.neg{color:var(--danger)}
   /* 选中行整行淡紫色高亮（不影响文字可读性） */
   tbody tr.sel td,
   tbody tr:has(.row-check:checked) td,
-  tbody tr:has(.orow-check:checked) td{background:#f1ebff}
+  tbody tr:has(.orow-check:checked) td{background:rgba(139,124,248,0.18)}
   tbody tr.sel:hover td,
   tbody tr:has(.row-check:checked):hover td,
-  tbody tr:has(.orow-check:checked):hover td{background:#ece3ff}
+  tbody tr:has(.orow-check:checked):hover td{background:rgba(139,124,248,0.26)}
 
   /* ---------- 弹窗 ---------- */
-  .modal-mask{display:none;position:fixed;inset:0;background:rgba(20,22,40,.45);z-index:50;
-    align-items:center;justify-content:center;padding:20px}
+  .modal-mask{display:none;position:fixed;inset:0;background:rgba(8,10,20,.55);z-index:50;
+    align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
   .modal-mask.show{display:flex}
-  .modal{background:#fff;border-radius:16px;max-width:1100px;width:100%;max-height:86vh;
-    display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.25)}
-  .modal-head{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .modal{background:rgba(23,27,48,0.72);border:1px solid var(--glass-border);border-radius:18px;max-width:1100px;width:100%;max-height:86vh;
+    display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.18);
+    backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%)}
+  .modal-head{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--glass-border-soft)}
   .modal-head .t{font-size:16px;font-weight:600}
   .modal-close{margin-left:auto;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)}
   .modal-body{padding:16px 20px;overflow:auto}
-  .modal-foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
+  .modal-foot{padding:12px 20px;border-top:1px solid var(--glass-border-soft);display:flex;gap:10px;justify-content:flex-end}
 
   .pick-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
-  .pick-item{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;
-    padding:9px 12px;cursor:pointer;font-size:13px;transition:.12s}
-  .pick-item:hover{border-color:var(--accent2)}
-  .pick-item.on{border-color:var(--accent);background:var(--accent-soft)}
+  .pick-item{display:flex;align-items:center;gap:8px;border:1px solid var(--glass-border);border-radius:10px;
+    padding:9px 12px;cursor:pointer;font-size:13px;transition:.12s;background:rgba(255,255,255,0.04);color:var(--ink)}
+  .pick-item:hover{border-color:var(--accent2);background:rgba(139,124,248,.16)}
+  .pick-item.on{border-color:var(--accent);background:rgba(139,124,248,.22)}
 
   .cmp-filter{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
-  .cmp-filter .f-inp{flex:1;min-width:180px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px}
-  .cmp-filter select{padding:8px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;cursor:pointer}
+  .cmp-filter .f-inp{flex:1;min-width:180px;padding:8px 11px;border:1px solid var(--glass-border);border-radius:8px;font-size:13px;background:var(--glass);color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .cmp-filter select{padding:8px 11px;border:1px solid var(--glass-border);border-radius:8px;font-size:13px;background:var(--glass);color:var(--ink);cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 
   .cmp-tbl th{position:static}
   .cmp-tbl{min-width:1200px}
-  .cmp-tbl td{padding:8px;font-size:13px}
+  .cmp-tbl td{padding:8px;font-size:13px;background:rgba(255,255,255,0.02)}
 
   /* ---------- 估价计算器 ---------- */
-  .calc-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:18px;border:1px solid var(--line);
-    border-radius:12px;background:#fff;margin-bottom:14px}
-  .calc-row .title{font-weight:600;font-size:15px;min-width:150px;color:#4c4370}
-  .calc-row input{width:110px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;text-align:center}
+  .calc-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:18px;border:1px solid var(--glass-border);
+    border-radius:12px;background:var(--glass);margin-bottom:14px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow)}
+  .calc-row .title{font-weight:600;font-size:15px;min-width:150px;color:#cdd3e6}
+  .calc-row input{width:110px;padding:9px 10px;border:1px solid var(--glass-border);border-radius:8px;font-size:14px;text-align:center;background:rgba(255,255,255,0.04);color:var(--ink)}
   .calc-row input:focus{outline:none;border-color:var(--accent)}
   .calc-op{font-size:16px;color:var(--sub);font-weight:600}
-  .calc-res{min-width:120px;padding:9px 14px;border-radius:8px;background:var(--accent-soft);
-    color:var(--accent);font-weight:700;font-size:16px;text-align:center}
+  .calc-res{min-width:120px;padding:9px 14px;border-radius:8px;background:rgba(139,124,248,.22);
+    color:#d9d2ff;font-weight:700;font-size:16px;text-align:center;border:1px solid rgba(139,124,248,.35)}
   .calc-sub{width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
   .calc-label{font-size:13px;color:var(--sub);min-width:64px}
-  .free-input{flex:1;min-width:260px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+  .free-input{flex:1;min-width:260px;padding:10px 12px;border:1px solid var(--glass-border);border-radius:8px;font-size:15px;background:var(--glass);color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 
   /* ---------- 下载页 ---------- */
   .dl-hero{display:flex;align-items:center;gap:18px;padding:26px}
   .dl-hero .ic{font-size:38px}
   .dl-list{margin-top:18px}
-  .dl-item{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--sub)}
+  .dl-item{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--glass-border-soft);font-size:13px;color:var(--sub)}
   .dl-item:last-child{border:none}
 
   /* ---------- 下单提交状态 & 日历 ---------- */
   .order-status{margin-bottom:14px;padding:12px 16px;border-radius:12px;font-size:13px;display:none;align-items:center;gap:8px}
   .order-status.show{display:flex}
-  .order-status.locked{background:#e8f7ee;color:#0f7a3d;border:1px solid #bfe8cf}
-  .order-status.editing{background:#fff7e6;color:#ad6800;border:1px solid #ffe3a3}
+  .order-status.locked{background:rgba(52,211,153,.14);color:#7ff0c0;border:1px solid rgba(52,211,153,.35)}
+  .order-status.editing{background:rgba(255,193,77,.14);color:#ffd27a;border:1px solid rgba(255,193,77,.35)}
   .cal-head{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
   .cal-head .t{font-size:16px;font-weight:600;min-width:120px;text-align:center}
-  .cal-nav{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:14px}
-  .cal-nav:hover{border-color:var(--accent);color:var(--accent)}
+  .cal-nav{border:1px solid var(--glass-border);background:var(--glass);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:14px;color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .cal-nav:hover{border-color:var(--accent);color:var(--accent2)}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
   .cal-wd{text-align:center;font-size:12px;color:var(--sub);padding:4px 0}
   .cal-cell{position:relative;text-align:center;padding:10px 0 14px;border-radius:8px;cursor:pointer;font-size:13px;transition:.12s}
-  .cal-cell:hover{background:var(--accent-soft)}
+  .cal-cell:hover{background:rgba(139,124,248,.16)}
   .cal-cell.today{border:1px solid var(--accent)}
-  .cal-cell.sel{background:var(--accent);color:#fff}
+  .cal-cell.sel{background:linear-gradient(135deg,#7c6cff,#a78bfa);color:#fff;box-shadow:0 8px 22px rgba(124,108,255,.4)}
   .cal-dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--ok)}
   .cal-cell.sel .cal-dot{background:#fff}
-  td input:disabled,td select:disabled{color:#8a8f9e;background:#fafafc;cursor:not-allowed}
+  td input:disabled,td select:disabled{color:#6a7088;background:rgba(255,255,255,.03);cursor:not-allowed}
 
   /* ---------- 导入拖拽区 ---------- */
-  .dropzone{border:2px dashed var(--line);border-radius:12px;padding:34px 20px;text-align:center;
-    transition:.15s;background:#fafaff;cursor:default}
-  .dropzone.over{border-color:var(--accent);background:var(--accent-soft)}
+  .dropzone{border:2px dashed var(--glass-border);border-radius:12px;padding:34px 20px;text-align:center;
+    transition:.15s;background:rgba(255,255,255,0.03);cursor:default}
+  .dropzone.over{border-color:var(--accent);background:rgba(139,124,248,.16)}
 
   /* ---------- 录入页整屏自适应（无横向滚动条） ---------- */
   #page-entry{max-width:none}
   #page-order{max-width:none}
   .tbl-wrap.fit{overflow-x:auto}
   #entry-table{min-width:0;width:100%;table-layout:fixed}
-  #entry-table th{padding:10px 4px;font-size:12px;overflow:hidden;text-overflow:ellipsis}
-  #entry-table td input,#entry-table td select{min-width:0;padding:8px 4px;font-size:12px}
+  #entry-table th{padding:10px 4px;font-size:12px;overflow:hidden;text-overflow:ellipsis;background:rgba(255,255,255,0.07)}
+  #entry-table td input,#entry-table td select{min-width:0;padding:8px 4px;font-size:12px;color:var(--ink)}
   #entry-table td select{appearance:none;-webkit-appearance:none;background-image:none;text-overflow:ellipsis}
   #entry-table .rise-cell{padding:8px 4px;font-size:12px}
   #order-table{min-width:0;width:100%;table-layout:fixed}
-  #order-table th{padding:10px 4px;font-size:12px;overflow:hidden;text-overflow:ellipsis}
-  #order-table td input,#order-table td select{min-width:0;padding:8px 4px;font-size:12px}
+  #order-table th{padding:10px 4px;font-size:12px;overflow:hidden;text-overflow:ellipsis;background:rgba(255,255,255,0.07)}
+  #order-table td input,#order-table td select{min-width:0;padding:8px 4px;font-size:12px;color:var(--ink)}
   #order-table .chk-col{width:3.5%;padding:0 !important;text-align:center}
   #order-table .chk-col input{width:16px;height:16px;min-width:0;cursor:pointer;accent-color:var(--accent)}
   .today-orders{margin-top:18px}
   .today-orders .today-head{font-weight:600;font-size:14px;margin-bottom:8px;color:var(--ink)}
-  .batch-count{font-weight:600;color:var(--accent);font-size:13px;margin-right:4px}
+  .batch-count{font-weight:600;color:var(--accent2);font-size:13px;margin-right:4px}
   .chk-col{width:3%;padding:0 !important;text-align:center;vertical-align:middle}
   .chk-col input{width:16px;height:16px;min-width:0;cursor:pointer;accent-color:var(--accent)}
   .rs{position:absolute;top:0;right:0;width:7px;height:100%;cursor:col-resize;z-index:3}
@@ -215,21 +247,102 @@
   body.rs-drag{user-select:none;cursor:col-resize}
 
   /* 模糊搜索下拉 */
-  .sug-box{position:absolute;background:#fff;border:1px solid var(--line);border-radius:10px;
-    box-shadow:var(--shadow);z-index:60;max-height:220px;overflow:auto;min-width:180px}
-  .sug-item{padding:8px 12px;font-size:13px;cursor:pointer}
-  .sug-item:hover{background:var(--accent-soft)}
+  .sug-box{position:absolute;background:rgba(23,27,48,0.82);border:1px solid var(--glass-border);border-radius:10px;
+    box-shadow:0 16px 44px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.15);z-index:60;max-height:220px;overflow:auto;min-width:180px;
+    backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%)}
+  .sug-item{padding:8px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
+  .sug-item:hover{background:rgba(139,124,248,.2)}
   .sug-sub{display:block;font-size:11px;color:var(--sub);margin-top:2px}
 
-  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#2b2f3f;color:#fff;
-    padding:10px 20px;border-radius:10px;font-size:13px;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);
+    background:rgba(23,27,48,0.8);color:#fff;border:1px solid var(--glass-border);
+    padding:10px 20px;border-radius:10px;font-size:13px;z-index:99;opacity:0;transition:.25s;pointer-events:none;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 12px 36px rgba(0,0,0,.45)}
   .toast.show{opacity:1}
-  .kbd{border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px;background:#fff;color:var(--sub)}
+  .kbd{border:1px solid var(--glass-border);border-radius:5px;padding:1px 6px;font-size:11px;background:rgba(255,255,255,0.06);color:var(--sub)}
+
+  /* ---------- 登录 / 注册 ---------- */
+  #auth-mask{display:none;position:fixed;inset:0;z-index:200;
+    background:
+      radial-gradient(900px 600px at 20% 0%, rgba(124,108,255,.35), transparent 60%),
+      radial-gradient(800px 600px at 100% 100%, rgba(34,211,238,.20), transparent 60%),
+      linear-gradient(160deg,#0a0e1a,#11163a);
+    align-items:center;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  #auth-mask.show{display:flex}
+  body.auth-mode .page{display:none!important}
+  .auth-card{width:380px;max-width:92vw;border-radius:18px;padding:30px 28px;
+    background:rgba(23,27,48,0.55);border:1px solid var(--glass-border);
+    box-shadow:0 24px 70px rgba(0,0,0,.55), inset 0 1px 1px rgba(255,255,255,.22);
+    backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%)}
+  .auth-card .logo{width:54px;height:54px;border-radius:15px;margin:0 auto 14px;background:linear-gradient(135deg,var(--accent),#a78bfa);display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 10px 26px rgba(124,108,255,.45), inset 0 1px 2px rgba(255,255,255,.5)}
+  .auth-card h2{text-align:center;font-size:20px;margin-bottom:4px;color:var(--ink)}
+  .auth-card .sub{text-align:center;color:var(--sub);font-size:12px;margin-bottom:18px}
+  .auth-tabs{display:flex;gap:8px;margin-bottom:16px}
+  .auth-tabs button{flex:1;border:1px solid var(--glass-border);background:rgba(255,255,255,0.05);border-radius:10px;padding:9px;cursor:pointer;font-size:14px;color:var(--sub)}
+  .auth-tabs button.on{background:linear-gradient(135deg,#7c6cff,#a78bfa);color:#fff;border-color:transparent}
+  .auth-field{margin-bottom:12px}
+  .auth-field label{display:block;font-size:12px;color:var(--sub);margin-bottom:5px}
+  .auth-field input,.auth-field select{width:100%;padding:10px 12px;border:1px solid var(--glass-border);border-radius:9px;font-size:14px;box-sizing:border-box;background:rgba(255,255,255,0.05);color:var(--ink)}
+  .auth-field input:focus,.auth-field select:focus{outline:none;border-color:var(--accent)}
+  .auth-login-type{display:flex;gap:8px;margin-bottom:12px}
+  .auth-login-type button{flex:1;border:1px solid var(--glass-border);background:rgba(255,255,255,0.05);border-radius:9px;padding:9px;cursor:pointer;font-size:13px;color:var(--sub)}
+  .auth-login-type button.on{background:rgba(139,124,248,.22);color:var(--accent2);border-color:var(--accent)}
+  .auth-err{color:var(--danger);font-size:12px;min-height:16px;margin-bottom:8px}
+  .auth-card .btn-primary{width:100%;padding:11px;font-size:15px}
+  .auth-switch{text-align:center;font-size:12px;color:var(--sub);margin-top:12px;cursor:pointer}
+  .auth-switch span{color:var(--accent2);cursor:pointer}
+
+  /* ---------- 只读提示 ---------- */
+  .ro-banner{background:rgba(255,193,77,.14);border:1px solid rgba(255,193,77,.35);color:#ffd27a;border-radius:8px;padding:7px 12px;font-size:12px;margin-bottom:12px}
+
+  /* ---------- 设置页 ---------- */
+  .sec-title{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--ink)}
+  .perm-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--glass-border-soft)}
+  .perm-row:last-child{border-bottom:none}
+  .perm-info{font-size:14px;color:var(--ink)}
+  .perm-row select{padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;font-size:13px;background:var(--glass);color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .settings-note{font-size:12px;color:var(--sub);line-height:1.6;margin-top:6px}
+  .user-pill{font-size:13px;color:var(--sub)}
+  .user-pill b{color:var(--ink)}
 </style>
 </head>
 <body>
 
 <!-- ============ 首页 ============ -->
+<!-- ============ 登录 / 注册 ============ -->
+<div class="auth-mask" id="auth-mask">
+  <div class="auth-card">
+    <div class="logo">藏</div>
+    <h2 id="auth-title">登录工作台</h2>
+    <div class="sub" id="auth-sub">使用邮箱或手机号登录（主账号可管理其他账号）</div>
+    <div class="auth-tabs">
+      <button id="tab-login" class="on" onclick="setAuthMode('login')">登录</button>
+      <button id="tab-register" onclick="setAuthMode('register')">注册</button>
+    </div>
+    <div id="reg-only" style="display:none">
+      <div class="auth-field">
+        <label>昵称（选填）</label>
+        <input id="auth-name" placeholder="例如：潘总">
+      </div>
+    </div>
+    <div class="auth-login-type">
+      <button id="lt-email" class="on" onclick="setLoginType('email')">邮箱</button>
+      <button id="lt-phone" onclick="setLoginType('phone')">手机号</button>
+    </div>
+    <div class="auth-field">
+      <label id="auth-login-label">邮箱</label>
+      <input id="auth-login" placeholder="输入邮箱 / 手机号">
+    </div>
+    <div class="auth-field">
+      <label>密码（至少 6 位）</label>
+      <input id="auth-pass" type="password" placeholder="输入密码" onkeydown="if(event.key==='Enter')authSubmit()">
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+    <button class="btn btn-primary" onclick="authSubmit()">登录</button>
+    <div class="auth-switch" id="auth-switch">还没有账号？<span onclick="setAuthMode('register')">立即注册</span></div>
+  </div>
+</div>
+
 <div class="page active" id="page-home">
   <div class="home-logo">藏</div>
   <div class="home-title">大佬潘专属工作台</div>
@@ -240,7 +353,9 @@
     <div class="home-card" onclick="go('order')"><div class="ic">📦</div><div class="t">下单</div><div class="d">向厂家一次性批量下单登记</div></div>
     <div class="home-card" onclick="go('calc')"><div class="ic">🧮</div><div class="t">卖价预估计算</div><div class="d">金版 / 银版 / 银金版快速估价</div></div>
     <div class="home-card" onclick="go('download')"><div class="ic">⬇️</div><div class="t">下载</div><div class="d">导出全部产品 Excel 并记录下载历史</div></div>
+    <div class="home-card" id="home-settings-card" onclick="go('settings')"><div class="ic">⚙️</div><div class="t">设置</div><div class="d">权限管理 / 主账号转移 / 注册人信息</div></div>
   </div>
+  <div class="home-sub" id="home-user" style="margin-top:18px"></div>
 </div>
 
 <!-- ============ 录入页 ============ -->
@@ -257,6 +372,8 @@
     <button class="btn btn-primary" onclick="oneClickOrder()" style="background:var(--ok)">🛒 一键下单</button>
     <button class="btn btn-ghost" onclick="clearSelect()">清除选择</button>
   </div>
+
+  <div class="ro-banner" id="ro-entry" style="display:none">🔒 只读模式：当前账号仅有查看权限，无法修改数据</div>
 
   <div class="filters card">
     <label>厂家</label><select id="f-factory" onchange="renderEntry()"></select>
@@ -327,6 +444,8 @@
     <button class="btn btn-danger" id="btn-modify-order" onclick="modifyOrder()">✏️ 修改</button>
     <button class="btn btn-danger" id="btn-batch-order" onclick="batchDeleteOrder()">🗑 批量删除选中</button>
   </div>
+
+  <div class="ro-banner" id="ro-order" style="display:none">🔒 只读模式：当前账号仅有查看权限，无法修改数据</div>
 
   <div class="order-status" id="order-status"></div>
 
@@ -464,6 +583,45 @@
   <div class="card dl-list">
     <div style="font-weight:600;margin-bottom:8px">下载历史记录</div>
     <div id="dl-history"></div>
+  </div>
+  <div class="card dl-hero" style="margin-top:14px">
+    <div class="ic">💾</div>
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:16px">备份 / 恢复全部数据（数据包）</div>
+      <div class="hint" style="margin-top:4px">下载当前所有数据为本地数据包（JSON）；若线上使用时数据丢失，可上传该数据包一键恢复。<b>账号与登录状态会被保留</b>，不会因恢复而锁死。</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" onclick="downloadBackup()">⬇️ 下载数据包</button>
+      <label class="btn btn-ghost" style="text-align:center;cursor:pointer">⬆️ 上传恢复<input type="file" accept="application/json,.json" style="display:none" onchange="uploadBackup(this)"></label>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 设置页 ============ -->
+<div class="page" id="page-settings">
+  <div class="topbar">
+    <button class="back-btn no-ro" onclick="go('home')">← 返回首页</button>
+    <div class="page-title">设置</div>
+    <div class="spacer"></div>
+    <span class="user-pill" id="settings-user"></span>
+    <button class="btn btn-danger" onclick="doLogout()">退出登录</button>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">① 权限设置（主账号对其他账号的权限）</div>
+    <div class="settings-note" style="margin-bottom:12px">选项：<b>只可查看</b> / <b>可查看可编辑</b> / <b>不可查看不可编辑</b>（防止陌生人进入网址看到机密信息）。</div>
+    <div id="perm-list"></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="sec-title">② 转移主账号管理权</div>
+    <div id="transfer-box"></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="sec-title">③ 注册登录设置（所有注册人详细信息）</div>
+    <div class="settings-note" style="margin-bottom:12px">仅主账号可见。列出所有注册账号的昵称、登录方式、账号、权限与注册时间。</div>
+    <div id="reg-list"></div>
   </div>
 </div>
 
@@ -634,14 +792,188 @@ function load(){
       d.orderHistory = d.orderHistory||[];
       d.orderDrafts = d.orderDrafts||[];
       d.orderMeta = d.orderMeta||{ locked:false, recordId:null };
+      d.accounts = d.accounts||[];
+      d.session = d.session||null;
       return d;
     }
   }catch(e){}
   return { products: [], orders: [], downloads: [], orderHistory: [], orderDrafts: [],
            orderMeta: { locked:false, recordId:null },
+           accounts: [], session: null,
            options: JSON.parse(JSON.stringify(DEFAULTS)) };
 }
 function save(){ localStorage.setItem(LS_KEY, JSON.stringify(DB)); }
+
+/* ================= 账号 / 登录 / 权限 ================= */
+/* 说明：当前账号与数据均存于本机浏览器。真正的"换设备登录拉回数据"需云端同步（后续任务）。
+   本步骤先完成：邮箱/手机号注册登录、主账号机制、登录门禁、按权限查看/编辑。 */
+let authMode = 'login';      // login | register
+let loginType = 'email';     // email | phone
+
+function hashPwd(s){ // 本地简易哈希（非加密级，仅作登录门禁；云端同步时会改用服务端密码）
+  let h = 5381; for(let i=0;i<s.length;i++){ h = ((h<<5)+h + s.charCodeAt(i))>>>0; }
+  return 'h'+h.toString(36);
+}
+function validLogin(t, v){
+  v=(v||'').trim();
+  if(t==='email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  return /^1\d{10}$/.test(v);
+}
+function currentUser(){ return DB.session ? DB.accounts.find(a=>a.id===DB.session.uid) : null; }
+function isMain(){ const u=currentUser(); return !!(u && u.role==='main'); }
+function permLevel(){
+  const u=currentUser(); if(!u) return 'guest';
+  if(u.role==='main') return 'main';
+  return u.permission||'view';
+}
+function canEdit(){ const p=permLevel(); return p==='main'||p==='edit'; }
+function canView(){ const p=permLevel(); return p!=='guest'&&p!=='none'; }
+
+function setAuthMode(m){
+  authMode=m;
+  document.getElementById('tab-login').classList.toggle('on', m==='login');
+  document.getElementById('tab-register').classList.toggle('on', m==='register');
+  document.getElementById('reg-only').style.display = m==='register'?'block':'none';
+  document.getElementById('auth-title').textContent = m==='register'?'注册新账号':'登录工作台';
+  document.getElementById('auth-sub').textContent = m==='register'
+    ? '注册后将成为普通账号（主账号可在设置里分配权限）'
+    : '使用邮箱或手机号登录（主账号可管理其他账号）';
+  document.getElementById('auth-switch').innerHTML = m==='register'
+    ? '已有账号？<span onclick="setAuthMode(\'login\')">去登录</span>'
+    : '还没有账号？<span onclick="setAuthMode(\'register\')">立即注册</span>';
+  document.getElementById('auth-err').textContent='';
+  document.getElementById('auth-login').value='';
+  document.getElementById('auth-pass').value='';
+}
+function setLoginType(t){
+  loginType=t;
+  document.getElementById('lt-email').classList.toggle('on', t==='email');
+  document.getElementById('lt-phone').classList.toggle('on', t==='phone');
+  document.getElementById('auth-login-label').textContent = t==='email'?'邮箱':'手机号';
+  document.getElementById('auth-login').placeholder = t==='email'?'输入邮箱':'输入 11 位手机号';
+}
+function authSubmit(){
+  const err = document.getElementById('auth-err');
+  err.textContent='';
+  const login = document.getElementById('auth-login').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  if(!validLogin(loginType, login)){ err.textContent = loginType==='email'?'邮箱格式不正确':'请输入 11 位手机号'; return; }
+  if(!pass || pass.length<6){ err.textContent='密码至少 6 位'; return; }
+  if(authMode==='register'){
+    if(DB.accounts.some(a=>a.login===login && a.type===loginType)){ err.textContent='该账号已注册，请直接登录'; return; }
+    const acc = { id: uid(), login, type:loginType, passHash:hashPwd(pass),
+      role: DB.accounts.length===0?'main':'sub',
+      permission: DB.accounts.length===0?'edit':'view',
+      info:{ name: document.getElementById('auth-name').value.trim(), regAt: today()+' '+new Date().toTimeString().slice(0,5) },
+      createdAt: today() };
+    DB.accounts.push(acc);
+    DB.session = { uid: acc.id };
+    save();
+    showApp();
+    toast(acc.role==='main'?'注册成功，你已是主账号':'注册成功，已以普通账号登录');
+  } else {
+    const acc = DB.accounts.find(a=>a.login===login && a.type===loginType);
+    if(!acc){ err.textContent='账号不存在，请先注册'; return; }
+    if(acc.passHash!==hashPwd(pass)){ err.textContent='密码错误'; return; }
+    DB.session = { uid: acc.id };
+    save();
+    showApp();
+    toast('登录成功'+(isMain()?'（主账号）':''));
+  }
+}
+function doLogout(){
+  DB.session=null; save(); showAuth();
+}
+function showAuth(){
+  document.body.classList.add('auth-mode');
+  document.getElementById('auth-mask').classList.add('show');
+  setAuthMode('login'); setLoginType('email');
+}
+function showApp(){
+  document.body.classList.remove('auth-mode');
+  document.getElementById('auth-mask').classList.remove('show');
+  refreshUserUI();
+  renderAll();
+  go('home');
+}
+function refreshUserUI(){
+  const u=currentUser();
+  const pill = document.getElementById('home-user');
+  if(pill) pill.innerHTML = u ? `当前登录：<b>${esc(u.info&&u.info.name||u.login)}</b>${isMain()?'（主账号）':''} · <a href="javascript:doLogout()" style="color:var(--accent)">退出</a>` : '';
+  const sc = document.getElementById('home-settings-card');
+  if(sc) sc.style.display = isMain()?'':'none';
+  const su = document.getElementById('settings-user');
+  if(su) su.innerHTML = u ? `👤 ${esc(u.info&&u.info.name||u.login)}${isMain()?'（主账号）':''}` : '';
+}
+
+/* 进入页面前做权限门禁 */
+const PAGE_REQ = { entry:'data', order:'data', calc:'data', download:'data', settings:'main' };
+function guardPage(p){
+  if(!currentUser()){ showAuth(); return false; }
+  const req = PAGE_REQ[p];
+  if(req==='main' && !isMain()){ toast('仅主账号可访问设置'); return false; }
+  if(req==='data' && permLevel()==='none'){ toast('当前账号无查看权限'); return false; }
+  return true;
+}
+
+/* 设置页渲染 */
+function renderSettings(){
+  if(!isMain()){ toast('仅主账号可访问设置'); go('home'); return; }
+  const subs = DB.accounts.filter(a=>a.role!=='main');
+  const permList = document.getElementById('perm-list');
+  if(!subs.length){ permList.innerHTML='<div class="hint">暂无其他账号（首个注册的账号自动为主账号）。</div>'; }
+  else permList.innerHTML = subs.map(a=>`
+    <div class="perm-row">
+      <div class="perm-info">👤 ${esc(a.info&&a.info.name||a.login)} <span class="hint">(${a.type==='email'?'邮箱':'手机'} ${esc(a.login)})</span></div>
+      <select onchange="setPerm('${a.id}',this.value)">
+        <option value="view"${a.permission==='view'?' selected':''}>只可查看</option>
+        <option value="edit"${a.permission==='edit'?' selected':''}>可查看可编辑</option>
+        <option value="none"${a.permission==='none'?' selected':''}>不可查看不可编辑</option>
+      </select>
+    </div>`).join('');
+  const tbox = document.getElementById('transfer-box');
+  if(!subs.length){ tbox.innerHTML='<div class="hint">暂无可转移的账号。</div>'; }
+  else tbox.innerHTML = `<div class="settings-note" style="margin-bottom:8px">将主账号管理权移交给以下某账号后，你本人将变为普通账号（可查看可编辑）。</div>
+    <select id="transfer-sel">${subs.map(a=>`<option value="${a.id}">${esc(a.info&&a.info.name||a.login)} (${esc(a.login)})</option>`).join('')}</select>
+    <button class="btn btn-danger" style="margin-left:8px" onclick="transferMain()">确认转移</button>`;
+  const rbox = document.getElementById('reg-list');
+  const permText = {view:'只可查看', edit:'可查看可编辑', none:'不可查看不可编辑'};
+  rbox.innerHTML = DB.accounts.map(a=>`
+    <div class="perm-row">
+      <div>${a.role==='main'?'👑':'👤'} ${esc(a.info&&a.info.name||a.login)}
+        <span class="hint">(${a.role==='main'?'主账号':(permText[a.permission]||'')} · ${a.type==='email'?'邮箱':'手机'} ${esc(a.login)} · 注册 ${esc((a.info&&a.info.regAt)||'')})</span></div>
+    </div>`).join('');
+}
+function setPerm(id, val){
+  const a = DB.accounts.find(x=>x.id===id); if(!a) return;
+  a.permission = val; save(); toast('权限已更新'); renderSettings();
+}
+function transferMain(){
+  const sel = document.getElementById('transfer-sel'); if(!sel) return;
+  const id = sel.value;
+  const a = DB.accounts.find(x=>x.id===id); if(!a) return;
+  if(!confirm('确定将主账号管理权转移给「'+(a.info&&a.info.name||a.login)+'」？转移后你将不再是主账号。')) return;
+  const me = currentUser();
+  me.role='sub'; me.permission='edit';
+  a.role='main'; a.permission='edit';
+  DB.session = { uid: a.id }; save();
+  refreshUserUI(); renderSettings();
+  toast('主账号已转移');
+}
+
+/* 只读模式：禁用录入/下单页的可编辑控件 */
+function applyReadonly(){
+  const show = !canEdit();
+  ['ro-entry','ro-order'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display = show?'block':'none'; });
+  if(!show) return;
+  ['entry-body','order-body'].forEach(id=>{
+    const t=document.getElementById(id); if(!t) return;
+    t.querySelectorAll('input,select,button').forEach(el=>el.disabled=true);
+  });
+}
+/* 写入类操作统一拦截（只读账号无法改动数据） */
+function ensureEdit(){ if(!canEdit()){ toast('当前账号无编辑权限'); return false; } return true; }
+
 
 /* ---------- 撤销 (Ctrl+Z) ---------- */
 let undoStack = [];
@@ -675,6 +1007,8 @@ function today(){
 
 /* ================= 页面导航 ================= */
 function go(p){
+  if(!guardPage(p)) return;
+  if(p==='settings') renderSettings();
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   if(p==='entry') renderEntry();
@@ -751,6 +1085,19 @@ function miniGrid(p, rows){
     return `<tr><td class="cl">${r.label}</td><td class="cv${r.isFormula?' formula-cell':''}">${inp}</td></tr>`;
   }).join('');
   return `<td class="calcgrid-cell"><table class="calc-mini">${cells}</table></td>`;
+}
+/* 仅当材质=银金版 显示 金/银/总和 2x3 网格；其余材质显示单格（总和值） */
+function miniCell(p, rows){
+  if(p.material === '银金版') return miniGrid(p, rows);
+  const r = rows[2]; // 总和行
+  const val = r.isFormula ? (p[r.field+'Formula'] ? p[r.field+'Result'] : p[r.field]) : p[r.field];
+  const inp = r.isFormula
+    ? `<input data-ref="${r.ref}" data-formula-field="${r.field}" value="${esc(val)}" placeholder="数字或 =公式"
+         onfocus="formulaFocus(this,'${p.id}','${r.field}')" onmousedown="refClick(event,this)"
+         onblur="formulaBlur(this,'${p.id}','${r.field}')" onkeydown="if(event.key==='Enter')this.blur()">`
+    : `<input value="${esc(val)}" placeholder="${esc(r.ph||'')}" list="tpl-list"
+         onfocus="beginEdit(this)" onchange="setField('${p.id}','${r.field}',this.value)">`;
+  return `<td class="calcgrid-cell single"><div class="single-inp">${inp}</div></td>`;
 }
 const WEIGHT_ROWS = [
   {label:'金', ref:'weightGold', field:'weightGold', isFormula:true},
@@ -980,12 +1327,12 @@ function renderEntry(){
       <td><input value="${esc(p.size)}" placeholder="尺寸"
             onfocus="beginEdit(this)" onchange="setField('${p.id}','size',this.value)"></td>
       <td>${optSelect(DB.options.materials, p.material, `pickOpt('${p.id}','material','materials',this)`, '添加材质')}</td>
-      ${miniGrid(p, WEIGHT_ROWS)}
-      ${miniGrid(p, TPL_ROWS)}
-      ${miniGrid(p, COST_ROWS)}
+      ${miniCell(p, WEIGHT_ROWS)}
+      ${miniCell(p, TPL_ROWS)}
+      ${miniCell(p, COST_ROWS)}
       <td><input value="${esc(p.fee)}" placeholder="工费" data-ref="fee"
             onfocus="beginEdit(this)" onmousedown="refClick(event,this)" onchange="setField('${p.id}','fee',this.value)"></td>
-      ${miniGrid(p, CALC_ROWS)}
+      ${miniCell(p, CALC_ROWS)}
       <td class="price-col"><input value="${esc(p.price)}" placeholder="定价" data-ref="price"
             onfocus="beginEdit(this)" onmousedown="refClick(event,this)" onchange="setField('${p.id}','price',this.value)"></td>
       <td><div class="rise-cell ${rise.neg?'neg':''}">${rise.text}</div></td>
@@ -1007,6 +1354,7 @@ function renderEntry(){
 
   // 选中产品时显示批量设置工具条
   renderEntryBatchBar();
+  applyReadonly();
 }
 
 function riseOf(p){
@@ -1101,7 +1449,8 @@ function updateSortInd(table){
 /* 对比弹窗表头：生成可排序 th（含当前排序指示） */
 function cmpTh(label,key){
   const st=sortState.cmp; const active=st&&st.key===key;
-  const cls='sortable'+(active?(' sort-'+(st.dir===1?'asc':'desc')):'');
+  const extra = key==='price' ? ' price-col' : '';
+  const cls='sortable'+(active?(' sort-'+(st.dir===1?'asc':'desc')):'')+extra;
   const ind=active?(st.dir===1?'▲':'▼'):'⇅';
   return `<th class="${cls}" data-sort="${key}" onclick="sortBy('cmp','${key}',this)">${label}<span class="sort-ind">${ind}</span></th>`;
 }
@@ -1318,7 +1667,7 @@ function renderCmpResult(){
       <td>${cmpBreak(p,'templateGold','templateSilver','template')}</td>
       <td>${cmpBreak(p,'costGold','costSilver','cost')}</td>
       <td>${esc(p.fee)}</td>
-      <td>${calcParts.join(' / ')}</td><td>${esc(p.price)}</td>
+      <td>${calcParts.join(' / ')}</td><td class="price-col">${esc(p.price)}</td>
       <td>${riseOf(p).text}</td><td>${esc(p.category)}</td><td>${esc(p.note)}</td></tr>`;
     }).join('')}</tbody></table></div>`;
 }
@@ -1498,6 +1847,7 @@ function renderOrder(){
     <td class="del-cell">${locked?'🔒':`<button class="del-row" onclick="delOrder('${o.id}')">🗑</button>`}</td>
   </tr>`).join('') || `<tr><td colspan="12" style="text-align:center;color:var(--sub);padding:30px;font-size:13px">暂无下单记录，点击右上角"＋ 新增一行"</td></tr>`;
   updateSortInd('order');
+  applyReadonly();
 }
 
 /* ---------- 提交 / 修改 / 新建 ---------- */
@@ -1831,6 +2181,40 @@ function renderDownloads(){
     ? DB.downloads.slice().reverse().map((d,i)=>`<div class="dl-item"><span>📄 ${esc(d.file)}</span><span>${esc(d.time)}</span></div>`).join('')
     : '<div class="hint" style="padding:10px 0">暂无下载记录</div>';
 }
+function downloadBackup(){
+  const data = JSON.stringify(DB, null, 2);
+  const blob = new Blob([data], { type:'application/json' });
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);
+  a.href = URL.createObjectURL(blob);
+  a.download = `藏物志备份_${ts}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  toast('已下载全部数据数据包');
+}
+function uploadBackup(input){
+  const f = input.files && input.files[0]; if(!f){ return; }
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!confirm('导入数据包将覆盖当前的产品、下单、历史等数据（账号与登录状态会保留）。确定继续？')){ input.value=''; return; }
+      const keepAccounts = DB.accounts, keepSession = DB.session;
+      DB = Object.assign({}, data);
+      DB.accounts = keepAccounts; DB.session = keepSession;
+      DB.options = Object.assign({}, JSON.parse(JSON.stringify(DEFAULTS)), DB.options);
+      DB.products = DB.products||[]; DB.orders = DB.orders||[];
+      DB.downloads = DB.downloads||[]; DB.orderHistory = DB.orderHistory||[];
+      DB.orderDrafts = DB.orderDrafts||[]; DB.orderMeta = DB.orderMeta||{locked:false,recordId:null};
+      save();
+      renderAll();
+      if(document.getElementById('page-download').classList.contains('active')) renderDownloads();
+      toast('数据已从数据包恢复');
+    }catch(err){ toast('数据包解析失败，请确认是本站导出的 JSON 文件'); }
+    input.value='';
+  };
+  reader.readAsText(f);
+}
 function downloadExcel(){
   if(!DB.products.length){ toast('还没有录入任何产品，无法导出'); return; }
   const gv = (p,f) => p[f+'Formula'] ? p[f+'Result'] : (p[f]||'');
@@ -2036,7 +2420,7 @@ function startResize(e, tableId, which, i){
 
 /* 初始化 */
 renderEntry(); renderOrder(); renderDownloads();
-go('home');
+if(DB.session && currentUser()){ showApp(); } else { showAuth(); }
 </script>
 </body>
 </html>
