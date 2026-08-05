@@ -84,6 +84,17 @@
   .filters label{font-size:13px;color:var(--sub)}
   .filters select{padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px;min-width:110px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   .hint{font-size:12px;color:var(--sub)}
+  /* 录入页吸顶：操作栏 + 筛选条(及批量条/只读条) + 表头，滚动时锁定不动 */
+  #page-entry .topbar, #page-entry .filters, #page-entry #ro-entry{position:sticky}
+  #page-entry .topbar{z-index:40;top:0;margin-bottom:0;padding-top:6px;padding-bottom:8px;
+    background:linear-gradient(180deg, rgba(12,14,28,.96), rgba(12,14,28,.82));
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:0 0 12px 12px}
+  #page-entry .filters{z-index:30;border-radius:14px;padding:10px 12px;margin-bottom:10px;
+    background:linear-gradient(180deg, rgba(12,14,28,.92), rgba(12,14,28,.80));
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+  #page-entry #ro-entry{z-index:35;margin-bottom:10px}
+  #page-entry .tbl-wrap{overflow:auto;max-height:calc(100vh - 196px)}
+  #entry-table thead th{position:sticky;top:0;z-index:20}
 
   /* ---------- 表格 ---------- */
   .tbl-wrap{overflow-x:auto;border:1px solid var(--glass-border);border-radius:12px;
@@ -105,7 +116,6 @@
   td.price-col input{font-weight:600;font-size:22px}
   td.price-col{font-weight:600;font-size:22px}
   th.qty-col, td.qty-col input, th.qty-col-disp, td.qty-col-disp{color:#ff4d4f !important}
-  td.price-col input::placeholder{color:#ff8a8a !important;opacity:.85}
   td.qty-col input::placeholder{color:#ff8a8a !important;opacity:.85}
   td.qty-col input{font-weight:600;font-size:24px}
   td.qty-col-disp{font-weight:600;font-size:24px}
@@ -965,6 +975,7 @@ function transferMain(){
 function applyReadonly(){
   const show = !canEdit();
   ['ro-entry','ro-order'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display = show?'block':'none'; });
+  updateEntrySticky();
   if(!show) return;
   ['entry-body','order-body'].forEach(id=>{
     const t=document.getElementById(id); if(!t) return;
@@ -1006,12 +1017,26 @@ function today(){
 }
 
 /* ================= 页面导航 ================= */
+/* 录入页吸顶偏移：操作栏/只读条/筛选条逐个堆叠 sticky，避免互相重叠 */
+function updateEntrySticky(){
+  const page=document.getElementById('page-entry'); if(!page) return;
+  const seq=[
+    page.querySelector('.topbar'),
+    page.querySelector('#ro-entry'),
+    ...page.querySelectorAll('.filters')
+  ].filter(el=>el && el.offsetParent!==null);
+  let cum=0;
+  seq.forEach(el=>{
+    el.style.top=cum+'px';
+    cum += el.offsetHeight + (parseFloat(getComputedStyle(el).marginBottom)||0) + (parseFloat(getComputedStyle(el).marginTop)||0);
+  });
+}
 function go(p){
   if(!guardPage(p)) return;
   if(p==='settings') renderSettings();
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  if(p==='entry') renderEntry();
+  if(p==='entry'){ renderEntry(); updateEntrySticky(); }
   if(p==='order') renderOrder();
   if(p==='download') renderDownloads();
   if(p==='calc') resetCalc();
@@ -1197,13 +1222,14 @@ function renderEntryBatchBar(){
   const bar = document.getElementById('entry-batch');
   if(!bar) return;
   const n = selectedIds.size;
-  if(n===0){ bar.style.display='none'; return; }
+  if(n===0){ bar.style.display='none'; updateEntrySticky(); return; }
   bar.style.display='';
   document.getElementById('entry-batch-count').textContent = `已选 ${n} 项 · 批量设置：`;
   fillSelectKeep('es-factory', DB.options.factories);
   fillSelectKeep('es-brand', DB.options.brands);
   fillSelectKeep('es-material', DB.options.materials);
   fillSelectKeep('es-category', DB.options.categories);
+  updateEntrySticky();
 }
 function batchSetProductAttrs(){
   const f = document.getElementById('es-factory').value;
@@ -2421,6 +2447,7 @@ function startResize(e, tableId, which, i){
 /* 初始化 */
 renderEntry(); renderOrder(); renderDownloads();
 if(DB.session && currentUser()){ showApp(); } else { showAuth(); }
+window.addEventListener('resize', updateEntrySticky);
 </script>
 </body>
 </html>
