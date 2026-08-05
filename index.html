@@ -995,7 +995,19 @@ async function unlockAndSync(pw){
   const { data, error } = await SB.from('user_data').select('cipher_json').eq('user_id', CLOUD_USER.id).maybeSingle();
   if(error) throw error;
   if(data && data.cipher_json){
-    loadCloudIntoDB(await ENC.decrypt(data.cipher_json, pw));
+    let cloudObj;
+    try { cloudObj = await ENC.decrypt(data.cipher_json, pw); }
+    catch(e){ throw new Error('decrypt-failed'); }
+    const localHasData = (DB.products&&DB.products.length)||(DB.orders&&DB.orders.length)||(DB.downloads&&DB.downloads.length);
+    const cloudHasData = (cloudObj.products&&cloudObj.products.length)||(cloudObj.orders&&cloudObj.orders.length)||(cloudObj.downloads&&cloudObj.downloads.length);
+    if(!cloudHasData && localHasData){
+      // 云端数据为空，但本地仍有数据：保留本地并覆盖上传，避免被空数据清空
+      await syncNow();
+      toast('云端数据为空，已用本地数据覆盖上传');
+    } else {
+      loadCloudIntoDB(cloudObj);
+      toast('已从云端恢复数据');
+    }
   } else {
     // 云端暂无数据：把当前本地数据加密上传到云端
     await syncNow();
