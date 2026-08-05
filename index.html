@@ -272,7 +272,7 @@
   .kbd{border:1px solid var(--glass-border);border-radius:5px;padding:1px 6px;font-size:11px;background:rgba(15,23,42,.04);color:var(--sub)}
 
   /* ---------- 登录 / 注册 ---------- */
-  #auth-mask{display:none;position:fixed;inset:0;z-index:200;
+  .auth-mask{display:none;position:fixed;inset:0;z-index:200;
     background:
       radial-gradient(900px 600px at 20% 0%, rgba(124,108,255,.22), transparent 60%),
       radial-gradient(800px 600px at 100% 100%, rgba(34,211,238,.16), transparent 60%),
@@ -1053,6 +1053,7 @@ function showAuth(){
 function showApp(){
   document.body.classList.remove('auth-mode');
   document.getElementById('auth-mask').classList.remove('show');
+  document.getElementById('dp-mask').classList.remove('show');
   refreshUserUI();
   renderAll();
   go('home');
