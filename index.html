@@ -975,7 +975,10 @@ async function syncNow(){
   if(!SB || !CLOUD_USER || !DATA_KEY) return;
   try{
     const cipher = await ENC.encrypt(syncableDB(), DATA_KEY);
-    const { error } = await SB.from('user_data').upsert({ user_id: CLOUD_USER.id, cipher_json: cipher, updated_at: new Date().toISOString() });
+    const { error } = await SB.from('user_data').upsert(
+      { user_id: CLOUD_USER.id, cipher_json: cipher, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
     if(error) throw error;
     console.log('[cloud] synced');
   }catch(e){ console.warn('[cloud] sync failed', e); toast('云端同步失败（本地已保存）：'+(e.message||'')); }
@@ -987,27 +990,36 @@ async function afterCloudAuth(user){
   document.getElementById('dp-mask').classList.add('show');
   try{ document.getElementById('dp-pass').focus(); }catch(e){}
 }
+async function unlockAndSync(pw){
+  DATA_KEY = pw;
+  const { data, error } = await SB.from('user_data').select('cipher_json').eq('user_id', CLOUD_USER.id).maybeSingle();
+  if(error) throw error;
+  if(data && data.cipher_json){
+    loadCloudIntoDB(await ENC.decrypt(data.cipher_json, pw));
+  } else {
+    // 云端暂无数据：把当前本地数据加密上传到云端
+    await syncNow();
+    toast('已将本地数据上传到云端');
+  }
+  const loginVal = lastLogin.login;
+  const name = (CLOUD_USER.user_metadata && CLOUD_USER.user_metadata.name) || loginVal;
+  let rec = DB.accounts.find(a=>a.id===CLOUD_USER.id);
+  if(!rec){ rec={id:CLOUD_USER.id, login:loginVal, type:lastLogin.type, role:'main', permission:'edit', info:{name}, createdAt: today()}; DB.accounts.push(rec); }
+  else { rec.login=loginVal; rec.type=lastLogin.type; rec.role='main'; rec.permission='edit'; rec.info=Object.assign({}, rec.info, {name}); }
+  DB.session={ uid: CLOUD_USER.id };
+  DATA_KEY=pw; save();
+  try{ sessionStorage.setItem('czz_data_key', pw); }catch(e){}
+}
 async function submitDataPass(){
   const err=document.getElementById('dp-err'); err.textContent='';
   if(!cryptoReady()){ err.textContent='当前打开方式不支持加密，请用 https 网址或本地服务器打开'; return; }
   const pw=document.getElementById('dp-pass').value;
   if(!pw||pw.length<6){ err.textContent='数据密码至少 6 位'; return; }
   try{
-    const { data, error } = await SB.from('user_data').select('cipher_json').eq('user_id', CLOUD_USER.id).maybeSingle();
-    if(error) throw error;
-    if(data && data.cipher_json){ loadCloudIntoDB(await ENC.decrypt(data.cipher_json, pw)); }
-    else { toast('云端暂无数据，已为你创建新的云端空间'); }
-    const loginVal = lastLogin.login;
-    const name = (CLOUD_USER.user_metadata && CLOUD_USER.user_metadata.name) || loginVal;
-    let rec = DB.accounts.find(a=>a.id===CLOUD_USER.id);
-    if(!rec){ rec={id:CLOUD_USER.id, login:loginVal, type:lastLogin.type, role:'main', permission:'edit', info:{name}, createdAt: today()}; DB.accounts.push(rec); }
-    else { rec.login=loginVal; rec.type=lastLogin.type; rec.role='main'; rec.permission='edit'; rec.info=Object.assign({}, rec.info, {name}); }
-    DB.session={ uid: CLOUD_USER.id };
-    DATA_KEY=pw; save();
-    try{ sessionStorage.setItem('czz_data_key', pw); }catch(e){}
+    await unlockAndSync(pw);
     document.getElementById('dp-mask').classList.remove('show');
     showApp();
-  }catch(e){ err.textContent='数据密码错误，或数据已损坏'; }
+  }catch(e){ DATA_KEY=null; err.textContent='数据密码错误，或数据已损坏'; }
 }
 
 function authSubmit(){
@@ -2609,7 +2621,16 @@ function startResize(e, tableId, which, i){
       if(cachedPw){
         document.body.classList.add('auth-mode');
         document.getElementById('dp-pass').value = cachedPw;
-        await submitDataPass();
+        try{
+          await unlockAndSync(cachedPw);
+          document.getElementById('dp-mask').classList.remove('show');
+          showApp();
+        }catch(e){
+          DATA_KEY=null;
+          document.getElementById('dp-err').textContent='数据密码已失效，请重新输入';
+          document.getElementById('dp-pass').value='';
+          document.getElementById('dp-mask').classList.add('show');
+        }
       } else {
         document.body.classList.add('auth-mode');
         document.getElementById('dp-err').textContent='';
