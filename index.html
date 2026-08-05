@@ -278,7 +278,7 @@
       radial-gradient(800px 600px at 100% 100%, rgba(34,211,238,.16), transparent 60%),
       linear-gradient(160deg,#ffffff,#eef1f8);
     align-items:center;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-  #auth-mask.show{display:flex}
+  .auth-mask.show{display:flex}
   body.auth-mode .page{display:none!important}
   .auth-card{width:380px;max-width:92vw;border-radius:18px;padding:30px 28px;
     background:rgba(255,255,255,0.66);border:1px solid var(--glass-border);
@@ -1004,6 +1004,7 @@ async function submitDataPass(){
     else { rec.login=loginVal; rec.type=lastLogin.type; rec.role='main'; rec.permission='edit'; rec.info=Object.assign({}, rec.info, {name}); }
     DB.session={ uid: CLOUD_USER.id };
     DATA_KEY=pw; save();
+    try{ sessionStorage.setItem('czz_data_key', pw); }catch(e){}
     document.getElementById('dp-mask').classList.remove('show');
     showApp();
   }catch(e){ err.textContent='数据密码错误，或数据已损坏'; }
@@ -1042,6 +1043,7 @@ async function doLogout(){
   try{ if(SB) await SB.auth.signOut(); }catch(e){}
   DATA_KEY=null; CLOUD_USER=null; lastLogin={login:'',type:'email'};
   DB.session=null; save(); showAuth();
+  try{ sessionStorage.removeItem('czz_data_key'); }catch(e){}
 }
 function showAuth(){
   document.body.classList.add('auth-mode');
@@ -2602,10 +2604,17 @@ function startResize(e, tableId, which, i){
     const ud = await SB.auth.getUser().catch(()=>({data:{}}));
     if(ud && ud.data && ud.data.user){
       CLOUD_USER = ud.data.user;
-      document.body.classList.add('auth-mode');
-      document.getElementById('dp-err').textContent='';
-      document.getElementById('dp-pass').value='';
-      document.getElementById('dp-mask').classList.add('show');
+      const cachedPw = sessionStorage.getItem('czz_data_key');
+      if(cachedPw){
+        document.body.classList.add('auth-mode');
+        document.getElementById('dp-pass').value = cachedPw;
+        await submitDataPass();
+      } else {
+        document.body.classList.add('auth-mode');
+        document.getElementById('dp-err').textContent='';
+        document.getElementById('dp-pass').value='';
+        document.getElementById('dp-mask').classList.add('show');
+      }
       renderEntry(); renderOrder(); renderDownloads();
       return;
     }
