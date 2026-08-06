@@ -84,11 +84,11 @@
   .filters label{font-size:13px;color:var(--sub)}
   .filters select{padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px;min-width:110px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   /* ---------- 多选筛选组件 ---------- */
-  .ms{position:relative;display:inline-block;z-index:45}
+  .ms{position:relative;display:inline-block}
   .ms-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap}
   .ms-btn.on{border-color:var(--accent2);color:var(--accent2);background:rgba(124,108,255,.08)}
   .ms-btn .ms-count{font-size:12px;font-weight:600}
-  .ms-panel{display:none;position:absolute;z-index:45;top:calc(100% + 6px);left:0;min-width:180px;max-height:300px;overflow:auto;background:#fff;border:1px solid var(--glass-border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);padding:8px}
+  .ms-panel{display:none;position:fixed;z-index:1000;min-width:180px;max-height:320px;overflow:auto;background:#fff;border:1px solid var(--glass-border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);padding:8px}
   .ms-panel.show{display:block}
   .ms-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer;color:#1d2433}
   .ms-opt:hover{background:#f3f1fb}
@@ -1510,13 +1510,16 @@ function updateMSBtn(k){
   else { btn.classList.add('on'); if(c) c.textContent='('+sel.size+')'; }
 }
 function msClear(k){ msInit(k).clear(); const panel=document.getElementById('ms-'+k+'-panel'); if(panel) panel.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=false); updateMSBtn(k); msOnChange(k); }
-function toggleMS(k){ const panel=document.getElementById('ms-'+k+'-panel'); if(!panel) return; if(panel.classList.contains('show')){ panel.classList.remove('show'); return; } document.querySelectorAll('.ms-panel.show').forEach(p=>p.classList.remove('show')); panel.classList.add('show'); }
+function closeAllMS(){ document.querySelectorAll('.ms-panel.show').forEach(p=>{ p.classList.remove('show'); if(p.__parent){ try{ p.__parent.insertBefore(p, p.__next); }catch(e){} p.__parent=null; p.style.position=''; p.style.top=''; p.style.left=''; } }); }
+function toggleMS(k){ const panel=document.getElementById('ms-'+k+'-panel'); if(!panel) return; if(panel.classList.contains('show')){ closeAllMS(); return; } closeAllMS(); const btn=panel.previousElementSibling; panel.__parent=panel.parentNode; panel.__next=panel.nextSibling; document.body.appendChild(panel); panel.classList.add('show'); const r=btn.getBoundingClientRect(); let top=r.bottom+6; if(top+panel.offsetHeight>window.innerHeight) top=Math.max(8, window.innerHeight-panel.offsetHeight-8); let left=r.left; if(left+panel.offsetWidth>window.innerWidth) left=Math.max(8, window.innerWidth-panel.offsetWidth-8); panel.style.top=top+'px'; panel.style.left=left+'px'; }
 function msOnChange(k){
   if(k==='factory'||k==='brand'||k==='material'||k==='category') renderEntry();
   else if(k==='orderer'||k==='ofactory'||k==='omaterial') renderOrder();
   else if(k==='cfactory'||k==='cmaterial'||k==='cbrand') renderCmpPick();
 }
-document.addEventListener('click', e=>{ if(!e.target.closest || !e.target.closest('.ms')) document.querySelectorAll('.ms-panel.show').forEach(p=>p.classList.remove('show')); });
+document.addEventListener('click', e=>{ if(!e.target.closest || (!e.target.closest('.ms') && !e.target.closest('.ms-panel'))) closeAllMS(); });
+window.addEventListener('scroll', closeAllMS, true);
+window.addEventListener('resize', closeAllMS);
 
 function brandFilterList(){
   // 品牌筛选项 = 基础品牌 + 已出现的联名品牌
