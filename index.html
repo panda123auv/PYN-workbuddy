@@ -83,6 +83,17 @@
   .filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
   .filters label{font-size:13px;color:var(--sub)}
   .filters select{padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px;min-width:110px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  /* ---------- 多选筛选组件 ---------- */
+  .ms{position:relative;display:inline-block}
+  .ms-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap}
+  .ms-btn.on{border-color:var(--accent2);color:var(--accent2);background:rgba(124,108,255,.08)}
+  .ms-btn .ms-count{font-size:12px;font-weight:600}
+  .ms-panel{display:none;position:absolute;z-index:80;top:calc(100% + 6px);left:0;min-width:180px;max-height:300px;overflow:auto;background:#fff;border:1px solid var(--glass-border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);padding:8px}
+  .ms-panel.show{display:block}
+  .ms-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:13px;cursor:pointer;color:#1d2433}
+  .ms-opt:hover{background:#f3f1fb}
+  .ms-opt input{accent-color:var(--accent2);width:15px;height:15px}
+  .ms-foot{display:flex;justify-content:flex-end;margin-top:6px;padding-top:8px;border-top:1px solid #eee}
   .hint{font-size:12px;color:var(--sub)}
   /* 录入页吸顶：操作栏 + 筛选条(及批量条/只读条) + 表头，滚动时锁定不动 */
   #page-entry .topbar, #page-entry .filters, #page-entry #ro-entry{position:sticky}
@@ -417,10 +428,10 @@
   <div class="ro-banner" id="ro-entry" style="display:none">🔒 只读模式：当前账号仅有查看权限，无法修改数据</div>
 
   <div class="filters card">
-    <label>厂家</label><select id="f-factory" onchange="renderEntry()"></select>
-    <label>品牌商</label><select id="f-brand" onchange="renderEntry()"></select>
-    <label>材质</label><select id="f-material" onchange="renderEntry()"></select>
-    <label>品类</label><select id="f-category" onchange="renderEntry()"></select>
+    <div class="ms"><button class="ms-btn" id="ms-factory-btn" type="button" onclick="toggleMS('factory')">厂家 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-factory-panel"></div></div>
+    <div class="ms"><button class="ms-btn" id="ms-brand-btn" type="button" onclick="toggleMS('brand')">品牌商 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-brand-panel"></div></div>
+    <div class="ms"><button class="ms-btn" id="ms-material-btn" type="button" onclick="toggleMS('material')">材质 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-material-panel"></div></div>
+    <div class="ms"><button class="ms-btn" id="ms-category-btn" type="button" onclick="toggleMS('category')">品类 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-category-panel"></div></div>
     <label style="margin-left:6px">搜索</label><input id="f-search" placeholder="主商家编码 / 产品名称" oninput="renderEntry()"
       style="padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;min-width:170px">
     <button class="btn btn-ghost" style="padding:6px 12px" onclick="clearFilters();document.getElementById('f-search').value='';renderEntry()">清除筛选</button>
@@ -491,9 +502,9 @@
   <div class="order-status" id="order-status"></div>
 
   <div class="filters card">
-    <label>下单人</label><select id="f-orderer" onchange="renderOrder()"></select>
-    <label>厂家</label><select id="f-ofactory" onchange="renderOrder()"></select>
-    <label>材质</label><select id="f-omaterial" onchange="renderOrder()"></select>
+    <div class="ms"><button class="ms-btn" id="ms-orderer-btn" type="button" onclick="toggleMS('orderer')">下单人 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-orderer-panel"></div></div>
+    <div class="ms"><button class="ms-btn" id="ms-ofactory-btn" type="button" onclick="toggleMS('ofactory')">厂家 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-ofactory-panel"></div></div>
+    <div class="ms"><button class="ms-btn" id="ms-omaterial-btn" type="button" onclick="toggleMS('omaterial')">材质 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-omaterial-panel"></div></div>
     <button class="btn btn-ghost" style="padding:6px 12px" onclick="clearOrderFilters()">清除筛选</button>
     <button class="btn btn-ghost" style="padding:6px 12px" onclick="clearSort('order')">↺ 取消排序</button>
     <div class="spacer"></div>
@@ -676,9 +687,9 @@
     <div class="modal-body">
       <div class="cmp-filter">
         <input id="cmp-search" class="f-inp" placeholder="搜索 产品名 / 编码 / 厂家" oninput="renderCmpPick()">
-        <select id="cmp-f-factory" onchange="renderCmpPick()"></select>
-        <select id="cmp-f-material" onchange="renderCmpPick()"></select>
-        <select id="cmp-f-brand" onchange="renderCmpPick()"></select>
+        <div class="ms"><button class="ms-btn" id="ms-cfactory-btn" type="button" onclick="toggleMS('cfactory')">厂家 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-cfactory-panel"></div></div>
+        <div class="ms"><button class="ms-btn" id="ms-cmaterial-btn" type="button" onclick="toggleMS('cmaterial')">材质 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-cmaterial-panel"></div></div>
+        <div class="ms"><button class="ms-btn" id="ms-cbrand-btn" type="button" onclick="toggleMS('cbrand')">品牌商 <span class="ms-count"></span> ▾</button><div class="ms-panel" id="ms-cbrand-panel"></div></div>
         <button class="btn btn-ghost" onclick="clearCmpFilter()">清空筛选</button>
       </div>
       <div class="pick-list" id="cmp-pick"></div>
@@ -1004,6 +1015,11 @@ async function unlockAndSync(pw){
       // 云端数据为空，但本地仍有数据：保留本地并覆盖上传，避免被空数据清空
       await syncNow();
       toast('云端数据为空，已用本地数据覆盖上传');
+    } else if(localHasData){
+      // 云端与本地都有数据：优先保留「当前设备刚录入/编辑的本地数据」，并覆盖上传到云端，
+      // 避免登录后本地刚填的数据被云端旧数据覆盖而"丢失"（保存功能失效的根因）
+      await syncNow();
+      toast('已用本地最新数据同步到云端');
     } else {
       loadCloudIntoDB(cloudObj);
       toast('已从云端恢复数据');
@@ -1472,7 +1488,35 @@ function fillFilter(selId, list, label){
   const cur = sel.value;
   sel.innerHTML = `<option value="">全部${label}</option>` + list.map(o=>`<option${o===cur?' selected':''}>${esc(o)}</option>`).join('');
 }
-function clearFilters(){ ['f-factory','f-brand','f-material','f-category'].forEach(id=>document.getElementById(id).value=''); renderEntry(); }
+function clearFilters(){ ['factory','brand','material','category'].forEach(k=>msClear(k)); document.getElementById('f-search').value=''; renderEntry(); }
+
+/* ---------- 多选筛选组件 ---------- */
+const msState = {};
+function msInit(k){ if(!msState[k]) msState[k]=new Set(); return msState[k]; }
+function msGet(k){ const s=msState[k]; return (s&&s.size)?[...s]:[]; }
+function fillMS(k, options){
+  msInit(k);
+  const panel=document.getElementById('ms-'+k+'-panel'); if(!panel) return;
+  const sel=msState[k];
+  panel.innerHTML = options.map(o=>`<label class="ms-opt"><input type="checkbox" data-v="${esc(o)}"${sel.has(o)?' checked':''} onchange="msToggle('${k}',this)"> ${esc(o)}</label>`).join('')
+    + `<div class="ms-foot"><button class="mini-btn" type="button" onclick="msClear('${k}')">清空</button></div>`;
+  updateMSBtn(k);
+}
+function msToggle(k, cb){ const sel=msInit(k); if(cb.checked) sel.add(cb.dataset.v); else sel.delete(cb.dataset.v); updateMSBtn(k); msOnChange(k); }
+function updateMSBtn(k){
+  const btn=document.getElementById('ms-'+k+'-btn'); if(!btn) return;
+  const sel=msState[k]||new Set(); const c=btn.querySelector('.ms-count');
+  if(!sel.size){ btn.classList.remove('on'); if(c) c.textContent=''; }
+  else { btn.classList.add('on'); if(c) c.textContent='('+sel.size+')'; }
+}
+function msClear(k){ msInit(k).clear(); const panel=document.getElementById('ms-'+k+'-panel'); if(panel) panel.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=false); updateMSBtn(k); msOnChange(k); }
+function toggleMS(k){ const panel=document.getElementById('ms-'+k+'-panel'); if(!panel) return; if(panel.classList.contains('show')){ panel.classList.remove('show'); return; } document.querySelectorAll('.ms-panel.show').forEach(p=>p.classList.remove('show')); panel.classList.add('show'); }
+function msOnChange(k){
+  if(k==='factory'||k==='brand'||k==='material'||k==='category') renderEntry();
+  else if(k==='orderer'||k==='ofactory'||k==='omaterial') renderOrder();
+  else if(k==='cfactory'||k==='cmaterial'||k==='cbrand') renderCmpPick();
+}
+document.addEventListener('click', e=>{ if(!e.target.closest || !e.target.closest('.ms')) document.querySelectorAll('.ms-panel.show').forEach(p=>p.classList.remove('show')); });
 
 function brandFilterList(){
   // 品牌筛选项 = 基础品牌 + 已出现的联名品牌
@@ -1483,25 +1527,25 @@ function brandFilterList(){
 }
 
 function renderEntry(){
-  fillFilter('f-factory', DB.options.factories, '厂家');
-  fillFilter('f-brand', brandFilterList(), '品牌商');
-  fillFilter('f-material', DB.options.materials, '材质');
-  fillFilter('f-category', DB.options.categories, '品类');
+  fillMS('factory', DB.options.factories);
+  fillMS('brand', brandFilterList());
+  fillMS('material', DB.options.materials);
+  fillMS('category', DB.options.categories);
 
-  const ff = document.getElementById('f-factory').value;
-  const fb = document.getElementById('f-brand').value;
-  const fm = document.getElementById('f-material').value;
-  const fc = document.getElementById('f-category').value;
+  const ff = msGet('factory');
+  const fb = msGet('brand');
+  const fm = msGet('material');
+  const fc = msGet('category');
   const kw = (document.getElementById('f-search').value||'').trim().toLowerCase();
 
   let rows = DB.products.filter(p=>{
-    if(ff && p.factory!==ff) return false;
-    if(fb){
-      if(fb==='联名款'){ if(p.brand!=='联名款') return false; }
-      else if(p.brand!==fb && p.coBrand!==fb) return false;
+    if(ff.length && !ff.includes(p.factory)) return false;
+    if(fb.length){
+      if(fb.includes('联名款')){ if(p.brand!=='联名款') return false; }
+      else if(!fb.includes(p.brand) && !fb.includes(p.coBrand)) return false;
     }
-    if(fm && p.material!==fm) return false;
-    if(fc && p.category!==fc) return false;
+    if(fm.length && !fm.includes(p.material)) return false;
+    if(fc.length && !fc.includes(p.category)) return false;
     if(kw){
       const hay = ((p.code||'')+' '+(p.name||'')).toLowerCase();
       if(!hay.includes(kw)) return false;
@@ -1785,34 +1829,30 @@ function refClick(ev, el){
 const cmpSelected = new Set();
 function openCompare(){
   if(!DB.products.length){ toast('还没有录入任何产品'); return; }
-  fillFilter('cmp-f-factory', DB.options.factories, '厂家');
-  fillFilter('cmp-f-material', DB.options.materials, '材质');
-  fillFilter('cmp-f-brand', brandFilterList(), '品牌商');
+  fillMS('cfactory', DB.options.factories);
+  fillMS('cmaterial', DB.options.materials);
+  fillMS('cbrand', brandFilterList());
   document.getElementById('cmp-search').value='';
-  document.getElementById('cmp-f-factory').value='';
-  document.getElementById('cmp-f-material').value='';
-  document.getElementById('cmp-f-brand').value='';
+  ['cfactory','cmaterial','cbrand'].forEach(k=>msClear(k));
   renderCmpPick(); renderCmpResult();
   document.getElementById('cmp-mask').classList.add('show');
 }
 function clearCmpFilter(){
   document.getElementById('cmp-search').value='';
-  document.getElementById('cmp-f-factory').value='';
-  document.getElementById('cmp-f-material').value='';
-  document.getElementById('cmp-f-brand').value='';
+  ['cfactory','cmaterial','cbrand'].forEach(k=>msClear(k));
   renderCmpPick();
 }
 function renderCmpPick(){
   const q = (document.getElementById('cmp-search').value||'').trim().toLowerCase();
-  const f = document.getElementById('cmp-f-factory').value;
-  const m = document.getElementById('cmp-f-material').value;
-  const b = document.getElementById('cmp-f-brand').value;
+  const f = msGet('cfactory');
+  const m = msGet('cmaterial');
+  const b = msGet('cbrand');
   const list = DB.products.filter(p=>{
-    if(f && p.factory!==f) return false;
-    if(m && p.material!==m) return false;
-    if(b){
-      if(b==='联名款'){ if(p.brand!=='联名款') return false; }
-      else if(p.brand!==b && p.coBrand!==b) return false;
+    if(f.length && !f.includes(p.factory)) return false;
+    if(m.length && !m.includes(p.material)) return false;
+    if(b.length){
+      if(b.includes('联名款')){ if(p.brand!=='联名款') return false; }
+      else if(!b.includes(p.brand) && !b.includes(p.coBrand)) return false;
     }
     if(q){
       const hay = ((p.code||'')+' '+(p.name||'')+' '+(p.factory||'')+' '+(p.brand||'')+' '+(p.coBrand||'')).toLowerCase();
@@ -1889,7 +1929,7 @@ function delOrder(id){
   DB.orders = DB.orders.filter(o=>o.id!==id);
   save(); renderOrder();
 }
-function clearOrderFilters(){ document.getElementById('f-orderer').value=''; document.getElementById('f-ofactory').value=''; document.getElementById('f-omaterial').value=''; renderOrder(); }
+function clearOrderFilters(){ ['orderer','ofactory','omaterial'].forEach(k=>msClear(k)); renderOrder(); }
 function onOrderCheck(el, id){
   if(el.checked) orderSelIds.add(id); else orderSelIds.delete(id);
 }
@@ -1996,13 +2036,13 @@ function renderTodayOrders(){
     </table></div>`;
 }
 function renderOrder(){
-  fillFilter('f-orderer', DB.options.orderers, '下单人');
-  fillFilter('f-ofactory', DB.options.factories, '厂家');
-  fillFilter('f-omaterial', DB.options.materials, '材质');
-  const fo = document.getElementById('f-orderer').value;
-  const ff = document.getElementById('f-ofactory').value;
-  const fm = document.getElementById('f-omaterial').value;
-  let rows = DB.orders.filter(o=>(!fo||o.orderer===fo)&&(!ff||o.factory===ff)&&(!fm||orderProductMaterial(o.product)===fm));
+  fillMS('orderer', DB.options.orderers);
+  fillMS('ofactory', DB.options.factories);
+  fillMS('omaterial', DB.options.materials);
+  const fo = msGet('orderer');
+  const ff = msGet('ofactory');
+  const fm = msGet('omaterial');
+  let rows = DB.orders.filter(o=>(!fo.length||fo.includes(o.orderer))&&(!ff.length||ff.includes(o.factory))&&(!fm.length||fm.includes(orderProductMaterial(o.product))));
   rows = sortRows(rows, 'order');
   document.getElementById('order-count').textContent = `显示 ${rows.length} / 共 ${DB.orders.length} 条`;
 
@@ -2092,7 +2132,7 @@ function newOrder(){
 
 /* ---------- 草稿箱 ---------- */
 function saveOrderDraft(){
-  const has = DB.orders.some(o=>o.product||o.factory||o.qty||o.code||o.stock||o.saleStatus);
+  const has = DB.orders.some(o=>o.product||o.factory||o.orderer||o.code||o.size||o.material||o.stock||o.saleStatus||o.qty||o.date);
   if(!has){ toast('当前没有可保存的下单内容'); return; }
   DB.orderDrafts.unshift({ id: uid(), savedAt: new Date().toLocaleString('zh-CN'), date: today(), rows: JSON.parse(JSON.stringify(DB.orders)) });
   save();
