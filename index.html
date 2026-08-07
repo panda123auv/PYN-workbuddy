@@ -647,6 +647,23 @@
       <label class="btn btn-ghost" style="text-align:center;cursor:pointer">⬆️ 上传恢复<input type="file" accept="application/json,.json" style="display:none" onchange="uploadBackup(this)"></label>
     </div>
   </div>
+  <div class="card dl-hero" style="margin-top:14px">
+    <div class="ic">🔗</div>
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:16px">跨账号分享 / 迁移数据（分享码）</div>
+      <div class="hint" style="margin-top:4px">把当前账号的全部业务数据生成一个「分享码」，在<b>另一个账号</b>里用该码一键拉取，实现两个账号共享同一份数据。<b>需先登录并解锁数据</b>。分享码等同于数据钥匙，请勿泄露给无关人员。</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" onclick="genShareCode()">🔗 生成分享码</button>
+      <div style="display:flex;gap:6px">
+        <input id="share-code-out" readonly placeholder="生成后这里显示分享码" style="flex:1;padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px">
+        <button class="btn btn-ghost" onclick="copyShareCode()">复制</button>
+      </div>
+      <div style="border-top:1px dashed var(--glass-border);margin:4px 0"></div>
+      <input id="share-code-in" placeholder="输入对方的分享码" style="padding:7px 10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--ink);font-size:13px">
+      <button class="btn btn-ghost" onclick="importShareCode()">📥 用分享码导入数据</button>
+    </div>
+  </div>
 </div>
 
 <!-- ============ 设置页 ============ -->
@@ -2459,6 +2476,57 @@ function uploadBackup(input){
     input.value='';
   };
   reader.readAsText(f);
+}
+/* ================= 跨账号分享（分享码） ================= */
+function genShareCodeStr(){
+  const alpha='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const buf=crypto.getRandomValues(new Uint8Array(8));
+  let s=''; for(let i=0;i<8;i++){ s+=alpha[buf[i]%alpha.length]; }
+  return s;
+}
+async function genShareCode(){
+  if(!SB || !CLOUD_USER || !DATA_KEY){ toast('请先登录并解锁数据后再生成分享码'); return; }
+  try{
+    const payload = syncableDB();
+    delete payload.accounts;            // 分享数据不含账号列表，避免污染对方账号
+    const cipher = await ENC.encrypt(payload, DATA_KEY);
+    const code = genShareCodeStr();
+    const { error } = await SB.from('shares').upsert({ id: code, cipher_json: cipher, created_at: new Date().toISOString() });
+    if(error) throw error;
+    document.getElementById('share-code-out').value = code;
+    try{ document.getElementById('share-code-out').select(); }catch(e){}
+    toast('分享码已生成并上传，复制发给对方/另一账号即可');
+  }catch(e){ toast('生成分享码失败：'+(e.message||e)); }
+}
+function copyShareCode(){
+  const el=document.getElementById('share-code-out');
+  if(!el.value){ toast('请先生成分享码'); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(el.value).then(()=>toast('已复制分享码'),()=>{ el.select(); document.execCommand&&document.execCommand('copy'); toast('已复制分享码'); }); }
+  else { el.select(); try{ document.execCommand('copy'); }catch(e){} toast('已复制分享码'); }
+}
+async function importShareCode(){
+  const code=(document.getElementById('share-code-in').value||'').trim().toUpperCase();
+  if(!code){ toast('请先输入分享码'); return; }
+  if(!SB || !CLOUD_USER){ toast('请先登录后再导入'); return; }
+  const pw=prompt('请输入分享数据的数据密码（即生成分享码那一边使用的数据密码）');
+  if(!pw) return;
+  try{
+    const { data, error } = await SB.from('shares').select('cipher_json').eq('id', code).maybeSingle();
+    if(error) throw error;
+    if(!data || !data.cipher_json){ toast('分享码无效或不存在'); return; }
+    const obj = await ENC.decrypt(data.cipher_json, pw);
+    if(!confirm('导入将用分享数据覆盖当前的产品、下单、历史等业务数据（你的账号与登录状态会保留）。确定继续？')) return;
+    const keepAccounts=DB.accounts, keepSession=DB.session;
+    loadCloudIntoDB(obj);
+    DB.accounts=keepAccounts; DB.session=keepSession;   // 保留当前账号身份
+    save();
+    renderAll();
+    if(document.getElementById('page-download').classList.contains('active')) renderDownloads();
+    toast('已从分享码导入数据，并已同步到你的云端');
+  }catch(e){
+    if(e && e.message==='decrypt-failed') toast('数据密码错误，无法解密分享数据');
+    else toast('导入失败：'+(e.message||e));
+  }
 }
 function downloadExcel(){
   if(!DB.products.length){ toast('还没有录入任何产品，无法导出'); return; }
